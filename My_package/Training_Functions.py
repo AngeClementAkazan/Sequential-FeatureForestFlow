@@ -74,8 +74,6 @@ random_state=42 ):
 
 
     def training(self):
-#         print(self.dt_loader)
-#         self.mask_cat=mask_cat
         b, c = self.dt_loader.shape
         x0_uniques = x0_probs = None
         results_cont = []

@@ -4,17 +4,6 @@ import copy
 from sklearn.preprocessing import MinMaxScaler
 
 
-def all_integers(column):
-    # Check if all elements are integers
-    are_integers = np.equal(column, np.round(column))
-
-    # Check if the decimal part of all elements is zero
-    decimal_part_is_zero = np.equal(np.modf(column)[0], 0)
-
-    # Combine the two conditions
-    result = np.logical_and(are_integers, decimal_part_is_zero)
-
-    return result.all()
 " This script contains data processing functions"
 class Data_processing_functions:
 
@@ -38,7 +27,33 @@ class Data_processing_functions:
         return df, df_names_before, df_names_after, cat_indexes
     
     @staticmethod
-    def minmax_scale_dummy(X_train, X_test, msk_ct, mask=None):
+    def all_integers(column):
+        # Check if all elements are integers
+        are_integers = np.equal(column, np.round(column))
+
+        # Check if the decimal part of all elements is zero
+        decimal_part_is_zero = np.equal(np.modf(column)[0], 0)
+
+        # Combine the two conditions
+        result = np.logical_and(are_integers, decimal_part_is_zero)
+
+        return result.all()
+    @staticmethod
+    def Dummify(X, cat_indexes, divide_by, drop_first=False):
+        df = pd.DataFrame(X, columns = [str(i) for i in range(X.shape[1])]) # to Pandas
+        df_names_before = df.columns
+        for i in cat_indexes:
+            df = pd.get_dummies(df, columns=[str(i)], prefix=str(i), dtype='float', drop_first=drop_first)
+            if divide_by > 0: # needed for L1 distance to equal 1 when categories are different
+                filter_col = [col for col in df if col.startswith(str(i) + '_')]
+                df[filter_col] = df[filter_col] / divide_by
+        df_names_after = df.columns
+        df = df.to_numpy()
+        cat_index=Data_processing_functions.dummify(X,cat_indexes,  drop_first=True)[-1]
+        return df, df_names_before, df_names_after,cat_index
+
+    @staticmethod
+    def minmax_scale_dummy(X_train, X_test, msk_ct,divide_by, mask=None):
         X_train_ = copy.deepcopy(X_train)
         X_test_ = copy.deepcopy(X_test)
         scaler = MinMaxScaler()
@@ -52,7 +67,7 @@ class Data_processing_functions:
         df_names_before, df_names_after = None, None
         n = X_train.shape[0]
         if len(cat_ind_only) > 0:                                
-            X_train_test, df_names_before, df_names_after,mask= Data_processing_functions.dummify(np.concatenate((X_train_, X_test_), axis=0),msk_ct, drop_first=False)
+            X_train_test, df_names_before, df_names_after,mask= Data_processing_functions.Dummify(np.concatenate((X_train_, X_test_), axis=0),cat_ind_only,divide_by, drop_first=False)
             X_train_ = X_train_test[0:n,:]
             X_test_ = X_train_test[n:,:]
         else:
@@ -92,7 +107,7 @@ class Data_processing_functions:
     @staticmethod 
     def clipping(min,max,sol,dt_loader,msk_cat):
         for o in range(dt_loader.shape[1]):
-            if np.all(np.equal(dt_loader[:,o], dt_loader[:,o].astype(int))) or all_integers(dt_loader[:,o]):
+            if np.all(np.equal(dt_loader[:,o], dt_loader[:,o].astype(int))) or  Data_processing_functions.all_integers(dt_loader[:,o]):
                 sol[:,o] = np.round(sol[:,o], decimals=0)
         small = (sol < min).astype(float)
         sol= small*min + (1-small)*sol

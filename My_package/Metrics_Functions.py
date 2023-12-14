@@ -181,7 +181,7 @@ def compute_coverage(real_features, fake_features, nearest_k=None):
 # print(n)
 # Need to train/test split for evaluating the linear regression performance and for W2 based on test
 def define_data_class_or_regr(X,y,n):
-    stratify_option = y if all_integers(y) else None
+    stratify_option = y if Data_processing_functions.all_integers(y) else None
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=n, stratify=stratify_option)
     Xy_train = np.concatenate((X_train, np.expand_dims(y_train, axis=1)), axis=1)
     Xy_test = np.concatenate((X_test, np.expand_dims(y_test, axis=1)), axis=1)
@@ -251,8 +251,8 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_set_name,i,N,K_dpl,Which_solv
             for gen_i in range(ngen):
                 Xy_fake_i = Xy_fake[gen_i]
 
-                Xy_train_scaled, Xy_fake_scaled,_,_,_,_= Data_processing_functions.minmax_scale_dummy(Xy_train, Xy_fake_i, mask_cat)
-                _, Xy_test_scaled, _,_,_,_= Data_processing_functions.minmax_scale_dummy(Xy_train, Xy_test,  mask_cat)
+                Xy_train_scaled, Xy_fake_scaled,_,_,_,_= Data_processing_functions.minmax_scale_dummy(Xy_train, Xy_fake_i, mask_cat,divide_by=2)
+                _, Xy_test_scaled, _,_,_,_= Data_processing_functions.minmax_scale_dummy(Xy_train, Xy_test,  mask_cat,divide_by=2)
                
                 # Wasserstein-2 based on L1 cost (after scaling)
                 if Xy_train.shape[0] < OTLIM:
@@ -322,7 +322,5 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_set_name,i,N,K_dpl,Which_solv
             # If conversion fails, append the original string
             csv_4_ls.append(i)
     m_dt.loc[0]=csv_4_ls
-#     m_dt=Metrics4_data[i][0]
-    m_dt=m_dt.loc[:,m_dt.loc[0] != 0]
     return m_dt,Xy_fake
 #     method_index_start = 0 #  so we loop back againsample_Euler(X,y, euler_solve,runge_kutta_solve,b,c,n_t)Metric,Sample=
