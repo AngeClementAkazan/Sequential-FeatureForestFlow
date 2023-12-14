@@ -181,7 +181,7 @@ def compute_coverage(real_features, fake_features, nearest_k=None):
 # print(n)
 # Need to train/test split for evaluating the linear regression performance and for W2 based on test
 def define_data_class_or_regr(X,y,n):
-    stratify_option = y if np.all(np.equal(y, y.astype(int))) or all_integers(y) else None
+    stratify_option = y if all_integers(y) else None
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=n, stratify=stratify_option)
     Xy_train = np.concatenate((X_train, np.expand_dims(y_train, axis=1)), axis=1)
     Xy_test = np.concatenate((X_test, np.expand_dims(y_test, axis=1)), axis=1)
