@@ -58,8 +58,10 @@ class Data_processing_functions:
         X_test_ = copy.deepcopy(X_test)
         scaler = MinMaxScaler()
         cat_ind_only=[i for i in range(len(msk_ct)) if msk_ct[i]]
+        
         if len(cat_ind_only) != X_train_.shape[1]: # if some variables are continuous, we  scale-transform
             not_cat_indexes=~np.array(msk_ct)  #Full 1D array indicating non categorical as True and categorical as False
+            
             scaler.fit(X_train_[:, not_cat_indexes])
             X_train_[:, not_cat_indexes] = scaler.transform(X_train_[:, not_cat_indexes])
             X_test_[:, not_cat_indexes] = scaler.transform(X_test_[:, not_cat_indexes])
@@ -81,22 +83,28 @@ class Data_processing_functions:
     def clean_onehot_data(X,X_names_before,X_names_after,ct_indexes): 
         cat_indexes=[ii for ii in range(len(ct_indexes)) if ct_indexes[ii]]
         if len(cat_indexes) > 0: # ex: [5, 3] and X_names_after [gender_a gender_b cartype_a cartype_b cartype_c]
+            
             X_names_after = copy.deepcopy(X_names_after.to_numpy())
             prefixes = [x.split('_')[0] for x in X_names_after if '_' in x] # for all categorical variables, we have prefix ex: ['gender', 'gender']
 
             unique_prefixes = sorted(set(prefixes ), key=lambda x: int(x))# uniques prefixes
+            
             for i in range(len(unique_prefixes)):
                 cat_vars_indexes = [unique_prefixes[i] + '_' in my_name for my_name in X_names_after]
                 cat_vars_indexes = np.where(cat_vars_indexes)[0] # actual indexes
-        #             print(X.shape)
+
                 cat_vars = X[:, cat_vars_indexes] # [b, c_cat]
+                
                 # dummy variable, so third category is true if all dummies are 0
                 cat_vars = np.concatenate((np.ones((cat_vars.shape[0], 1))*0.5,cat_vars), axis=1)
+                
                 # argmax of -1, -1, 0 is 0; so as long as they are below 0 we choose the implicit-final class
                 max_index = np.argmax(cat_vars, axis=1) # argmax across all the one-hot features (most likely category)
+                
                 X[:, cat_vars_indexes[0]] = max_index
                 X_names_after[cat_vars_indexes[0]] = unique_prefixes[i] # gender_a -> gender
             df = pd.DataFrame(X, columns = X_names_after) # to Pandas
+            
             df = df[X_names_before] # remove all gender_b, gender_c and put everything in the right order
             X = df.to_numpy()
         return X
@@ -106,9 +114,9 @@ class Data_processing_functions:
     
     @staticmethod 
     def clipping(min,max,sol,dt_loader,msk_cat):
-        for o in range(dt_loader.shape[1]):
-            if np.all(np.equal(dt_loader[:,o], dt_loader[:,o].astype(int))) or  Data_processing_functions.all_integers(dt_loader[:,o]):
-                sol[:,o] = np.round(sol[:,o], decimals=0)
+#         for o in range(dt_loader.shape[1]):
+#             if np.all(np.equal(dt_loader[:,o], dt_loader[:,o].astype(int))) or  Data_processing_functions.all_integers(dt_loader[:,o]):
+#                 sol[:,o] = np.round(sol[:,o], decimals=0)
         small = (sol < min).astype(float)
         sol= small*min + (1-small)*sol
         big = (sol> max).astype(float)
