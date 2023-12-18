@@ -16,16 +16,16 @@ FM_instance = CFM(sigma=0.0)
                   
 class sampling:
 
-    def __init__(self,dt_loader,d_name,N,K_dpl,Which_solver=None):
+    def __init__(self,dt_loader,N,K_dpl,which_solver=None):
         self.dt_loader=dt_loader 
-        self.d_name=d_name
         self.N=N
         self.K_dpl=K_dpl
-        self.Which_solver=Which_solver 
-        """ data: is the data to be inputted
+        self.which_solver=which_solver 
+        """ dt_loader: is the data to be inputted
             K_dpl: is the number of time we duplicate our data
             mask_cat: is the mask for categorical data (list containing True for categorical and False for Continuous
             N: is the number of noise level we are dealing with 
+            which_solver: takes two values: {Euler: for Euler solver or RG4: for Runge Kutta solver}
         """
 
     def Final_training(self,dta,N,K_dpl,mask_cat):
@@ -51,8 +51,8 @@ class sampling:
             return train_c,data_from_1hotEnc,data_4_training,scaler, cat_ind_b4_1hotEnc,mask_cat_4_1hotEnc,X_names_before, X_names_after
 
     def sample(self):
-
-            dta,msk_ct=self.dt_loader(self.d_name)[0],self.dt_loader(self.d_name)[-1]
+    
+            dta,msk_ct=self.dt_loader[0],self.dt_loader[-1]
              # Sanity check, must remove observations with only missing data
             obs_to_remove = np.isnan(dta).all(axis=1)
             dta = dta[~obs_to_remove]
@@ -63,10 +63,10 @@ class sampling:
             X=data_from_1hotEnc #To get the same shape with dummyfied data in our solvers
             Solver=solvers(data_4_training,train_c,mask_cat_4_1hotEnc,self.N)
 
-            if self.Which_solver == "Euler":
+            if self.which_solver == "Euler":
                 solution = Solver.euler_solve(x_k) # Euler solver
                 
-            elif self.Which_solver == "Rg4":
+            elif self.which_solver == "Rg4":
                 solution= Solver.runge_kutta_solve(x_fake) #Runge Kutta solver 
                 
             else:
