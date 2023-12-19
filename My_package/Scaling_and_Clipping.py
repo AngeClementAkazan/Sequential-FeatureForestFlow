@@ -10,6 +10,7 @@ class Data_processing_functions:
     @staticmethod
     def dummify(X,mask,  drop_first=True):
         df = pd.DataFrame(X, columns=[str(i) for i in range(X.shape[1])])  # Convert to Pandas
+        
         df_names_before = df.columns
 
         cat_indexes = []  # List to store categorical column indexes
@@ -47,6 +48,7 @@ class Data_processing_functions:
             if divide_by > 0: # needed for L1 distance to equal 1 when categories are different
                 filter_col = [col for col in df if col.startswith(str(i) + '_')]
                 df[filter_col] = df[filter_col] / divide_by
+
         df_names_after = df.columns
         df = df.to_numpy()
         cat_index=Data_processing_functions.dummify(X,cat_indexes,  drop_first=True)[-1]

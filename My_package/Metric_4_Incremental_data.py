@@ -182,7 +182,7 @@ def define_data_class_or_regr(X,y,n):
     stratify_option = y if Data_processing_functions.all_integers(y) else None
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=n, stratify=stratify_option)
     if len(X.shape)==1:
-        print("len(X.shape)==1:",len(X.shape)==1)
+       
         X_train = X_train.reshape(-1,1)
         X_test=X_test.reshape(-1,1)
         Xy_train = np.copy(X_train)
@@ -193,11 +193,12 @@ def define_data_class_or_regr(X,y,n):
     return Xy_train, Xy_test,X_train, X_test, y_train, y_test
 
 def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
-            N,K_dpl,which_solver,problem_type=None,method=None,forest_flow=None,mask_cat=None):
+            N,K_dpl,which_solver,model_type,problem_type=None,method=None,forest_flow=None,mask_cat=None):
     """ ngen and nexp: Number of generation and experiment
         diffusion_model: the diffusion function you have to input ( the parameters should be dt_loader,i,N and K_dpl)
         dt_loader and dt_name: are respectively the data  and the name of the data you imputted
         problem_type: takes two arguments {Regression: if the data was studied for a regression or Classification: if it was for a classification}
+        model_type: chooses whether we opt for regressor only or regressor mixed with classifier
         N,K_dpl,which_solver,method: are the number of noise levels, the number of duplication, a string that provide the name of the solver we want the options are (Euler: for euler solver, Rg4: for: Runge Kutta 4th order, or Any_string: for both).
         mask_cat: is the list that shows wether or not the feature of your data set are categorical
         """
@@ -246,11 +247,11 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
 #     print(X.shape,y.shape)
     for n in range(nexp):
             Xy_train, Xy_test,X_train, X_test, y_train, y_test=define_data_class_or_regr(X,y,n)
-            print("X_train.shape:",X_train.shape[1])
+       
             start = time.time()
             
             if forest_flow==False:
-                smp=diffusion_model(dt_loader,N,K_dpl,which_solver)
+                smp=diffusion_model(dt_loader,N,K_dpl,model_type,which_solver)
                 solution=smp.sample()
                 Xy_fake= np.array([solution for k in range(ngen)])
             else:
@@ -263,7 +264,7 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
 
                 Xy_train_scaled, Xy_fake_scaled,_,_,_,_= Data_processing_functions.minmax_scale_dummy(Xy_train, Xy_fake_i, mask_cat,divide_by=2)
                 _, Xy_test_scaled, _,_,_,_= Data_processing_functions.minmax_scale_dummy(Xy_train, Xy_test,  mask_cat,divide_by=2)
-#                 print("here")
+     
                 # Wasserstein-2 based on L1 cost (after scaling)
                 if Xy_train.shape[0] < OTLIM:
                     score_W2_train[method] += np.sqrt(pot.emd2(pot.unif(Xy_train_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_train_scaled, Xy_fake_scaled, metric='cityblock'), numItermax=200000)) / (nexp*ngen)
@@ -275,15 +276,15 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
                 
 #                 print("np.concatenate((X_train, X_test), axis=0):",np.concatenate((X_train, X_test), axis=0).shape[1])
                 # Trained on real data
-                f1_real, R2_real = test_on_multiple_models(X_train, y_train, X_test, y_test,  cat_indexes,problem_type,  nexp)
+                f1_real, R2_real = test_on_multiple_models(X_train, y_train, X_test, y_test,  cat_indexes[:X_train.shape[1]],problem_type,  nexp)
 
                 # Trained on fake data
-                f1_fake, R2_fake = test_on_multiple_models(X_fake, y_fake, X_test, y_test, cat_indexes,problem_type,  nexp)
+                f1_fake, R2_fake = test_on_multiple_models(X_fake, y_fake, X_test, y_test,cat_indexes[:X_fake.shape[1]],problem_type,  nexp)
 #                 print(f1_fake)
                 # Trained on real data and fake data
                 X_both = np.concatenate((X_train,X_fake), axis=0)
                 y_both = np.concatenate((y_train,y_fake))
-                f1_both, R2_both = test_on_multiple_models(X_both, y_both, X_test, y_test,cat_indexes,problem_type,  nexp)
+                f1_both, R2_both = test_on_multiple_models(X_both, y_both, X_test, y_test,cat_indexes[:X_both.shape[1]],problem_type,  nexp)
                 
                 for key in ['mean', 'lin', 'linboost', 'tree', 'treeboost']:
                     f1[method]['real'][key] += f1_real[key] / (nexp*ngen)
@@ -298,10 +299,9 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
                 coverage_test[method] += compute_coverage(Xy_test_scaled, Xy_fake_scaled, None) / (nexp*ngen)
 
 #         Write results in csv file
-    print("""      ______________________________________________________________________
-  
+    print(""" 
     __________________Data sampled and performance metrics computed__________________ 
-        ______________________________________________________________________""")    
+       """)    
     csv_str = f"{dt_name} , " + method_str + f", {score_W2_train[method]} , {score_W2_test[method]} , {R2[method]['real']['mean']} , {R2[method]['fake']['mean']} , {R2[method]['both']['mean']} , {f1[method]['real']['mean']} , {f1[method]['fake']['mean']} ,{f1[method]['both']['mean']} , {coverage[method]} , {coverage_test[method]}  , {time_taken[method]} " 
     for key in ['lin', 'linboost', 'tree', 'treeboost']:
         csv_str += f",{R2[method]['real'][key]} , {R2[method]['fake'][key]} , {R2[method]['both'][key]} , {f1[method]['real'][key]} , {f1[method]['fake'][key]} , {f1[method]['both'][key]} "
