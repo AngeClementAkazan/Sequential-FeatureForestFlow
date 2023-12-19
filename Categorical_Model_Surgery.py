@@ -6,51 +6,52 @@ from My_package.Solver_Functions import solvers
 from My_package.Scaling_and_Clipping import Data_processing_functions
 from My_package.Sampling_Functions import sampling
 from My_package.Metrics_Functions import test_on_multiple_models, Metrics,compute_coverage
+from My_package. Metric_4_Incremental_data import test_on_multiple_models, Metrics,compute_coverage
 
-# def create_csv(data_set_name,dic):
-#     dta=dic[list(dic.keys())[0]][0]
-#     Metric_dtfr=pd.DataFrame(columns=dta.columns)
-#     cpt=0
-# #     for i in data_set_name:
-#     dt=dic["iris"][0]
-#     Metric_dtfr.loc[cpt]=dt.iloc[0]
-#     cpt+=1
-#     return Metric_dtfr
+ 
+
+def create_csv(data_set_name,dic):
+    dta=dic[list(dic.keys())[0]][0]
+    Metric_dtfr=pd.DataFrame(columns=dta.columns)
+    cpt=0
+    for i in range(1,len(data_set_name)):
+        dt=dic[i][0]
+        Metric_dtfr.loc[cpt]=dt.iloc[0]
+        cpt+=1
+    return Metric_dtfr
+
 class Categorical_surgeon:
-    def __init__(self, data, data_name)
-    self.data=data
-    self.data_name=data_name
+    def __init__(self, dt_loader, data_name):
+        self.dt_loader=dt_loader
+        self.data_name=data_name
     
     def Run_2F2S_Incrementally(self):
-        
-#         dic_4_newdata_name= { for i in range(self.data.shape[1])}
         Incremental_data=None
         Metrics4_data={}
         FM_instance = CFM(sigma=0.0) 
-        ngen,nexp=1,1
-        N,K_dpl,Which_solver=2,1,"Euler"  
-        for k in range(1,self.data.shape[1]+1):
-            Incremental_data=self.data[:,:k]
+        ngen,nexp=3,5
+        N,K_dpl,Which_solver,problem_type=30,50,"Euler","Class"
+        for k in range(1,self.dt_loader[0].shape[1]+1):
+            Incremental_data=self.dt_loader[0][:,:k]
+            mask_cat=self.dt_loader[-1][:k]
+            dt_loader_Inc=(Incremental_data,mask_cat)
+            
             New_data_name=f"{self.data_name}_{k}"
             
-            Metrics4_data[k]=Metrics(ngen,nexp,sampling,Incremental_data,New_data_name,
-                                     N,K_dpl,Which_solver,forest_flow=False,mask_cat=None)
+            Metrics4_data[k]=Metrics(ngen,nexp,sampling,dt_loader_Inc,New_data_name,
+                                     N,K_dpl,Which_solver,problem_type,forest_flow=False)
         return Metrics4_data
     
-data_set_name=["congress","tic-tac-toe"]            
- 
+data_set=["congress","tic-tac-toe"]            
+# data_set=["congress"]  
 Dict_4_Metrics={}
-for i in data_set_name:
-    Dict_4_Metrics[i]=Categorical_surgeon(data_loader(i),i).Run_2F2S_Incrementally()
+for i in range(len(data_set)):
+    data_set_name=[f"{data_set[i]}_{k}" for k in range(1,data_loader(data_set[i])[0].shape[1]+1) ]
+    Dict_4_Metrics[i]=Categorical_surgeon(data_loader(data_set[i]),data_set[i]).Run_2F2S_Incrementally()
+    print(Dict_4_Metrics[i])
+    Classsifier_surgery=create_csv(data_set_name,Dict_4_Metrics[i])
+    Classsifier_surgery.to_csv(f"/Users/ange-clementakazan/Documents/Metrics_for_Forest_Flow_Based_Variable_Sampling_for_{data_set[i]}_incremental_data.csv")
 
 
-
-Dict_4_Metric=create_csv(data_set_name,Dict_4_Metrics)
-        #Save it as csv
-Dict_4_Metric.to_csv('/Users/ange-clementakazan/Documents/Metrics_4_Forest_Flow_Based_Variable_Sampling_for incremental_data.csv')
-        
-        
-if __name__ == '__main__':
-    unittest.main()
             
             
