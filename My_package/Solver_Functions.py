@@ -1,7 +1,7 @@
 " These functions are the solvers used for the sampling of our flow matching models"
 import numpy as np
 
-class solvers:
+class solvers: 
     def __init__(self,dt_loader,tr_container,mask_cat,model_type,N):
         self.dt_loader=dt_loader 
         self.tr_container=tr_container

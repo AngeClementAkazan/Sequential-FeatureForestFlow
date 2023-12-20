@@ -1,4 +1,3 @@
-# data=dataset="iris"
 from sklearn.exceptions import ConvergenceWarning
 import time
 import numpy as np
@@ -17,7 +16,6 @@ from My_package.Scaling_and_Clipping import Data_processing_functions
 from My_package.Sampling_Functions import sampling
 from tensorflow.python.ops.numpy_ops import np_config
 
-# from utils import dummify
 
 import copy
 
@@ -240,11 +238,12 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
     
     cat_indexes=[i for i in range(len(mask_cat)) if mask_cat[i]]
     if dt_loader[0].shape[1]==1:
-        X=y=dt_loader[0][:,0]
-#         print("X.shape:",X.shape)
+        X,y=dt_loader[0][:,0].reshape(-1,1),dt_loader[0][:,0]
+       
+
     else:
         X,y=dt_loader[0][:,:-1],dt_loader[0][:,-1]
-#     print(X.shape,y.shape)
+
     for n in range(nexp):
             Xy_train, Xy_test,X_train, X_test, y_train, y_test=define_data_class_or_regr(X,y,n)
        
@@ -267,20 +266,23 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
      
                 # Wasserstein-2 based on L1 cost (after scaling)
                 if Xy_train.shape[0] < OTLIM:
-                    score_W2_train[method] += np.sqrt(pot.emd2(pot.unif(Xy_train_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_train_scaled, Xy_fake_scaled, metric='cityblock'), numItermax=200000)) / (nexp*ngen)
-                    score_W2_test[method] += np.sqrt(pot.emd2(pot.unif(Xy_test_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_test_scaled, Xy_fake_scaled, metric='cityblock'), numItermax=200000)) / (nexp*ngen)
+                if dt_name=="tic-tac-toe":
+                        score_W2_train[method] += np.sqrt(pot.emd2(pot.unif(Xy_train_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_train_scaled, Xy_fake_scaled, metric='cityblock'), numItermax=200000)) / (nexp*ngen)
+                        score_W2_test[method] += np.sqrt(pot.emd2(pot.unif(Xy_test_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_test_scaled, Xy_fake_scaled, metric='cityblock'), numItermax=200000)) / (nexp*ngen)
+                else:
+                         score_W2_train[method] += np.sqrt(pot.emd2(pot.unif(Xy_train_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_train_scaled, Xy_fake_scaled, metric='cityblock'), numItermax=100000)) / (nexp*ngen)
+                        score_W2_test[method] += np.sqrt(pot.emd2(pot.unif(Xy_test_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_test_scaled, Xy_fake_scaled, metric='cityblock'), numItermax=100000)) / (nexp*ngen)
                 if dt_loader[0].shape[1]==1:
                     X_fake,y_fake = Xy_fake_i[:,0].reshape(-1,1),Xy_fake_i[:,0]
                 else:
                     X_fake, y_fake = Xy_fake_i[:,:-1], Xy_fake_i[:,-1]
-                
-#                 print("np.concatenate((X_train, X_test), axis=0):",np.concatenate((X_train, X_test), axis=0).shape[1])
+
                 # Trained on real data
                 f1_real, R2_real = test_on_multiple_models(X_train, y_train, X_test, y_test,  cat_indexes[:X_train.shape[1]],problem_type,  nexp)
 
                 # Trained on fake data
                 f1_fake, R2_fake = test_on_multiple_models(X_fake, y_fake, X_test, y_test,cat_indexes[:X_fake.shape[1]],problem_type,  nexp)
-#                 print(f1_fake)
+# 
                 # Trained on real data and fake data
                 X_both = np.concatenate((X_train,X_fake), axis=0)
                 y_both = np.concatenate((y_train,y_fake))
@@ -299,9 +301,8 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
                 coverage_test[method] += compute_coverage(Xy_test_scaled, Xy_fake_scaled, None) / (nexp*ngen)
 
 #         Write results in csv file
-    print(""" 
-    __________________Data sampled and performance metrics computed__________________ 
-       """)    
+    print(f"__________________The {dt_name} data set has been sampled and its performance metrics has been computed__________________ 
+       ")    
     csv_str = f"{dt_name} , " + method_str + f", {score_W2_train[method]} , {score_W2_test[method]} , {R2[method]['real']['mean']} , {R2[method]['fake']['mean']} , {R2[method]['both']['mean']} , {f1[method]['real']['mean']} , {f1[method]['fake']['mean']} ,{f1[method]['both']['mean']} , {coverage[method]} , {coverage_test[method]}  , {time_taken[method]} " 
     for key in ['lin', 'linboost', 'tree', 'treeboost']:
         csv_str += f",{R2[method]['real'][key]} , {R2[method]['fake'][key]} , {R2[method]['both'][key]} , {f1[method]['real'][key]} , {f1[method]['fake'][key]} , {f1[method]['both'][key]} "

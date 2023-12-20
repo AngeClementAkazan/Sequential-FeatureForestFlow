@@ -1,12 +1,6 @@
 import unittest
 import pandas as pd
-from My_package.Training_Functions import Training
-from My_package.Data_loading import data_loader
-from My_package.Flow_matching_class import CFM
-from My_package.Solver_with_continous_models import solvers
-from My_package.Scaling_and_Clipping import Data_processing_functions
-from My_package.Sampling_Functions import sampling
-from My_package.Metric_4_Incremental_data import test_on_multiple_models, Metrics,compute_coverage
+from My_package import *
 
 def create_csv(data_set_name,dic):
     dta=dic[list(dic.keys())[0]][0]
@@ -24,8 +18,8 @@ class TestTrainingClass(unittest.TestCase):
         data_set_name=["iris","wine","congress","tic-tac-toe","heart_disease"]
         FM_instance = CFM(sigma=0.0) 
         Metrics4_data={}
-        ngen,nexp,model_type=3,5,"cont_only"
-        N,K_dpl,Which_solver,problem_type=30,70,"Euler", ["Class","Class","Class","Class","Reg"]
+        ngen,nexp,model_type=3,5,"cont&cat"
+        N,K_dpl,Which_solver,problem_type=30,10,"Euler", ["Class","Class","Class","Class","Reg"]
         for i in range(len(data_set_name)):
             if data_set_name[i]=="congress" or data_set_name[i]=="tic-tac-toe":
                 Metrics4_data[data_set_name[i]]=Metrics(ngen,nexp,sampling,data_loader(data_set_name[i]),data_set_name[i],
