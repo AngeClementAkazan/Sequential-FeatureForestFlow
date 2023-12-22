@@ -42,14 +42,10 @@ class sampling:
                 X_transformed[:,~np.array(mask_cat_4_1hotEnc)]=scaler.fit_transform(X_transformed[:,~np.array(mask_cat_4_1hotEnc)])
 
             #Container that hold the Training Xgboost model
-            if K_dpl==None:
-                data_4_training=X_transformed
-                Train_c=Training(FM_instance,data_4_training,mask_cat_4_1hotEnc,self.model_type,self.N)
-                train_c=Train_c.training()
-            else:
-                data_4_training=np.tile(X_transformed, (K_dpl, 1))
-                Train_c=Training(FM_instance,data_4_training,mask_cat_4_1hotEnc,self.model_type,self.N)
-                train_c=Train_c.training()
+       
+            data_4_training=np.tile(X_transformed, (self.K_dpl, 1))
+            Train_c=Training(FM_instance,data_4_training,mask_cat_4_1hotEnc,self.model_type,self.K_dpl,self.N)
+            train_c=Train_c.training()
             return train_c,data_from_1hotEnc,data_4_training,scaler, cat_ind_b4_1hotEnc,mask_cat_4_1hotEnc,X_names_before, X_names_after
 
     def sample(self):
@@ -63,7 +59,7 @@ class sampling:
             x_k=x_fake= None
             # ODE solve
             X=data_from_1hotEnc #To get the same shape with dummyfied data in our solvers
-            Solver=solvers(data_4_training,train_c,mask_cat_4_1hotEnc,self.model_type,self.N)
+            Solver=solvers(data_4_training,self.K_dpl,train_c,mask_cat_4_1hotEnc,self.model_type,self.N)
 
             if self.which_solver == "Euler":
                 solution = Solver.euler_solve(x_k) # Euler solver
