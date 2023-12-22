@@ -14,7 +14,7 @@ from sklearn.preprocessing import LabelEncoder
 import statsmodels.api as sm
 from My_package.Scaling_and_Clipping import Data_processing_functions
 from My_package.Sampling_Functions import sampling
-from tensorflow.python.ops.numpy_ops import np_config
+
 
 
 import copy
@@ -207,8 +207,8 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
     else:
         method="Forest Flow"
             
-    score_W2_train = {}
-    score_W2_test = {}
+    score_W1_train = {}
+    score_W1_test = {}
     coverage = {}
     coverage_test = {}
     time_taken = {}
@@ -217,8 +217,8 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
     AW = {}
     # for method in args.methods:
     method_str =method
-    score_W2_test[method] = 0.0
-    score_W2_train[method] = 0.0
+    score_W1_test[method] = 0.0
+    score_W1_train[method] = 0.0
     coverage[method] = 0.0
     coverage_test[method] = 0.0
     time_taken[method] = 0.0
@@ -238,12 +238,12 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
     
     cat_indexes=[i for i in range(len(mask_cat)) if mask_cat[i]]
     if dt_loader[0].shape[1]==1:
-        X,y=dt_loader[0][:,0].reshape(-1,1),dt_loader[0][:,0]
+        X=y=dt_loader[0][:,0]
        
 
     else:
         X,y=dt_loader[0][:,:-1],dt_loader[0][:,-1]
-
+    b,c=dt_loader[0].shape
     for n in range(nexp):
             Xy_train, Xy_test,X_train, X_test, y_train, y_test=define_data_class_or_regr(X,y,n)
        
@@ -252,26 +252,28 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
             if forest_flow==False:
                 smp=diffusion_model(dt_loader,N,K_dpl,model_type,which_solver)
                 solution=smp.sample()
-                Xy_fake= np.array([solution for k in range(ngen)])
+                Xy_fake=solution.reshape(-1,b,c)
             else:
                 Xy_fake= np.array([diffusion_model(dt_loader,N,K_dpl) for k in range(ngen)])
             end = time.time()
             time_taken[method] += (end - start) / nexp
             for gen_i in range(ngen):
                 
-                Xy_fake_i = Xy_fake[gen_i]
+                Xy_fake_i = Xy_fake[gen_i][:,:]
 
                 Xy_train_scaled, Xy_fake_scaled,_,_,_,_= Data_processing_functions.minmax_scale_dummy(Xy_train, Xy_fake_i, mask_cat,divide_by=2)
                 _, Xy_test_scaled, _,_,_,_= Data_processing_functions.minmax_scale_dummy(Xy_train, Xy_test,  mask_cat,divide_by=2)
      
                 # Wasserstein-2 based on L1 cost (after scaling)
-                if Xy_train.shape[0] < OTLIM:
-                if dt_name=="tic-tac-toe":
-                        score_W2_train[method] += np.sqrt(pot.emd2(pot.unif(Xy_train_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_train_scaled, Xy_fake_scaled, metric='cityblock'), numItermax=200000)) / (nexp*ngen)
-                        score_W2_test[method] += np.sqrt(pot.emd2(pot.unif(Xy_test_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_test_scaled, Xy_fake_scaled, metric='cityblock'), numItermax=200000)) / (nexp*ngen)
-                else:
-                         score_W2_train[method] += np.sqrt(pot.emd2(pot.unif(Xy_train_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_train_scaled, Xy_fake_scaled, metric='cityblock'), numItermax=100000)) / (nexp*ngen)
-                        score_W2_test[method] += np.sqrt(pot.emd2(pot.unif(Xy_test_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_test_scaled, Xy_fake_scaled, metric='cityblock'), numItermax=100000)) / (nexp*ngen)
+                if Xy_train.shape[0]<OTLIM:
+                    if dt_name=="tic-tac-toe":
+                        score_W1_train[method] += pot.emd2(pot.unif(Xy_train_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_train_scaled, Xy_fake_scaled, metric='cityblock'), numItermax=200000) / (nexp*ngen)
+                        score_W1_test[method] += pot.emd2(pot.unif(Xy_test_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_test_scaled, Xy_fake_scaled, metric='cityblock'), numItermax=200000) / (nexp*ngen)
+                    else:
+                        score_W1_train[method] += pot.emd2(pot.unif(Xy_train_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_train_scaled, Xy_fake_scaled, metric='cityblock'), numItermax=100000) / (nexp*ngen)
+                        score_W1_test[method] += pot.emd2(pot.unif(Xy_test_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_test_scaled, Xy_fake_scaled, metric='cityblock'), numItermax=100000) / (nexp*ngen)
+                        
+
                 if dt_loader[0].shape[1]==1:
                     X_fake,y_fake = Xy_fake_i[:,0].reshape(-1,1),Xy_fake_i[:,0]
                 else:
@@ -301,15 +303,14 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
                 coverage_test[method] += compute_coverage(Xy_test_scaled, Xy_fake_scaled, None) / (nexp*ngen)
 
 #         Write results in csv file
-    print(f"__________________The {dt_name} data set has been sampled and its performance metrics has been computed__________________ 
-       ")    
-    csv_str = f"{dt_name} , " + method_str + f", {score_W2_train[method]} , {score_W2_test[method]} , {R2[method]['real']['mean']} , {R2[method]['fake']['mean']} , {R2[method]['both']['mean']} , {f1[method]['real']['mean']} , {f1[method]['fake']['mean']} ,{f1[method]['both']['mean']} , {coverage[method]} , {coverage_test[method]}  , {time_taken[method]} " 
+    print(f"____The {dt_name} data set has been sampled and its performance metrics have been computed_____")    
+    csv_str = f"{dt_name} , " + method_str + f", {score_W1_train[method]} , {score_W1_test[method]} , {R2[method]['real']['mean']} , {R2[method]['fake']['mean']} , {R2[method]['both']['mean']} , {f1[method]['real']['mean']} , {f1[method]['fake']['mean']} ,{f1[method]['both']['mean']} , {coverage[method]} , {coverage_test[method]}  , {time_taken[method]} " 
     for key in ['lin', 'linboost', 'tree', 'treeboost']:
         csv_str += f",{R2[method]['real'][key]} , {R2[method]['fake'][key]} , {R2[method]['both'][key]} , {f1[method]['real'][key]} , {f1[method]['fake'][key]} , {f1[method]['both'][key]} "
     csv_str += f"\n"
 
 
-    ls=["dataset", "method_str", f"score_W2_train[{method}]" ,f" score_W2_test[{method}]" , f"R2[{method}]['real']['mean']" , f"R2[{method}]['fake']['mean']" , f"R2[{method}]['both']['mean']" , f"f1[{method}]['real']['mean']" , f"f1[{method}]['fake']['mean']" , f"f1[{method}]['both']['mean']" , f"coverage[{method}]" ,f"coverage_test[{method}]" ,f"time_taken[{method}] "]
+    ls=["dataset", "method_str", f"score_W1_train[{method}]" ,f" score_W1_test[{method}]" , f"R2[{method}]['real']['mean']" , f"R2[{method}]['fake']['mean']" , f"R2[{method}]['both']['mean']" , f"f1[{method}]['real']['mean']" , f"f1[{method}]['fake']['mean']" , f"f1[{method}]['both']['mean']" , f"coverage[{method}]" ,f"coverage_test[{method}]" ,f"time_taken[{method}] "]
     #     print(csv_str)
     
     result = []

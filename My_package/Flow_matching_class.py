@@ -2,7 +2,6 @@
 import numpy as np
 import os
 import copy
-import torch
 
 def resh_t(t, x):
     if isinstance(t, float):

@@ -60,10 +60,8 @@ class Data_processing_functions:
         X_test_ = copy.deepcopy(X_test)
         scaler = MinMaxScaler()
         cat_ind_only=[i for i in range(len(msk_ct)) if msk_ct[i]]
-        
-        if len(cat_ind_only) != X_train_.shape[1]: # if some variables are continuous, we  scale-transform
+        if len(cat_ind_only)!= X_train_.shape[1]: # if some variables are continuous, we  scale-transform
             not_cat_indexes=~np.array(msk_ct)  #Full 1D array indicating non categorical as True and categorical as False
-            
             scaler.fit(X_train_[:, not_cat_indexes])
             X_train_[:, not_cat_indexes] = scaler.transform(X_train_[:, not_cat_indexes])
             X_test_[:, not_cat_indexes] = scaler.transform(X_test_[:, not_cat_indexes])

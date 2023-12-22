@@ -1,10 +1,9 @@
-# data_set_name=["iris","wine","congress","heart_disease"]
-
 from sklearn.datasets import load_iris,load_wine
 import pandas as pd
 from ucimlrepo import fetch_ucirepo
 import numpy as np
 import os
+import copy
 import wget
 import zipfile
 import warnings
@@ -33,10 +32,14 @@ def data_loader(dt_name):
         X = my_data.data.features 
         y = my_data.data.targets 
         Xy=pd.concat([X, y], axis=1)
-        Xy_c=Xy.dropna().copy()
-        Xy_c=Xy_c.values
+        Xyy=Xy.dropna().copy()
+        X=Xyy.values
+        y=X[:,-1]
+        new_perm = np.random.permutation(X.shape[0])
+        np.take(X, new_perm, axis=0, out=X)
+        np.take(y, new_perm, axis=0, out=y)
         mask_cat = [False, True, True, False, False,True, True, False,True, False, True, False,True,False]
-        return Xy_c,X,y,my_data,mask_cat
+        return X,y,my_data,mask_cat
     elif dt_name=="tic-tac-toe":
         my_data=fetch_tictactoe()
         X=my_data['data']
@@ -44,8 +47,11 @@ def data_loader(dt_name):
         mask_cat=[True, True, True ,True, True, True,True, True,True,True]   
     else:
         raise Exception('Download your data')
-
+    new_perm = np.random.permutation(X.shape[0])
+    np.take(X, new_perm, axis=0, out=X)
+    np.take(y, new_perm, axis=0, out=y)
     X=np.concatenate((X, y.reshape(-1,1)), axis=1)
+    X, y = copy.deepcopy(X), copy.deepcopy(y)
     return X,y,my_data,mask_cat    
 def fetch_tictactoe():
     dataset_dir = '/Users/ange-clementakazan/Documents/DIFFUSION_MODELS'

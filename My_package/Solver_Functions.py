@@ -2,11 +2,12 @@
 import numpy as np
 
 class solvers: 
-    def __init__(self,dt_loader,tr_container,mask_cat,model_type,N):
+    def __init__(self,dt_loader,K_dpl,tr_container,mask_cat,model_type,N):
         self.dt_loader=dt_loader 
         self.tr_container=tr_container
         self.mask_cat=mask_cat 
         self.N=N 
+        self.K_dpl=K_dpl
         self.model_type=model_type
         
         """ dt_loader: is the dt_loader to be inputted after dummy encoding
@@ -21,16 +22,16 @@ class solvers:
         else:         # x receives the previous variable having been 
             x = np.concatenate((x_k, x_prev), axis=1) # We respect the training structure for continuous variable that is: the model reveives (X_noise, Variable1,...,Variable k-1) to predict Variable k
         b,c=self.dt_loader.shape
-        out = np.zeros((b,c)) # [b, c]
+        out = np.zeros((b*self.K_dpl,c)) # [b, c]
         i = int(round(t*(self.N-1)))
         out[:, k] = self.tr_container[0][count][i].predict(x)
         return out
     
     def my_model_cat(self,tr_container,dt_loader,k,cat_cont, x_prev):
         b,c=self.dt_loader.shape
-        out = np.zeros((b,c))
+        out = np.zeros((b*self.K_dpl,c))
         if x_prev is None and k==0:
-            out[:, k] = self.tr_container[1][0][:b]# random sample
+            out[:, k] = self.tr_container[1][0]# random sample
         else:
             out[:, k]=self.tr_container[1][cat_cont].predict(x_prev)
         return out
@@ -50,7 +51,7 @@ class solvers:
                     cat_count+=1
                 else:
                     t=0
-                    x_k=np.random.normal(size=(b,1))
+                    x_k=np.random.normal(size=(b*self.K_dpl,1))
                     for i in range(self.N-1):
                         x_k = x_k + h*self.my_model_cont(self.tr_container,self.dt_loader,t,k,cont_count,self.N,x_k, x_prev)[:,k].reshape(-1,1)                     #[:,k] because we want to return the k th column predicted by the model
                         t = t + h
@@ -63,7 +64,7 @@ class solvers:
         elif self.model_type== "cont_only":
             for k in range(c):
                 t=0
-                x_k=np.random.normal(size=(b,1))
+                x_k=np.random.normal(size=(b*self.K_dpl,1))
                 for i in range(self.N-1):
                     x_k = x_k + h*self.my_model_cont(self.tr_container,self.dt_loader,t,k,cont_count,self.N,x_k, x_prev)[:,k].reshape(-1,1)                     # k because we want to return the k th column preddicted by the model
                     t = t + h
@@ -92,7 +93,7 @@ class solvers:
                     cat_count+=1
                 else:
                     t=0
-                    x_fake=np.random.normal(size=(b,1))
+                    x_fake=np.random.normal(size=(b*self.K_dpl,1))
                     for i in range(self.N-1):
                         x_fake = x_fake + h*self.my_model_cont(self.tr_container,self.dt_loader,t,k,cont_count,self.N,x_fake, x_prev)[:,k].reshape(-1,1)                     #[:,k] because we want to return the k th column predicted by the model
                         t = t + h
@@ -105,7 +106,7 @@ class solvers:
         elif self.model_type== "cont_only":
             for k in range(c):
                 t=0
-                x_fake=np.random.normal(size=(b,1))
+                x_fake=np.random.normal(size=(b*self.K_dpl,1))
                 for i in range(self.N-1):
                     x_fake =x_fake + h*self.my_model_cont(self.tr_container,self.dt_loader,t,k,cont_count,self.N,x_fake, x_prev)[:,k].reshape(-1,1)                     # k because we want to return the k th column preddicted by the model
                     t = t + h
