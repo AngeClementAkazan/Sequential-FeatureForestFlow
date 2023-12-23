@@ -1,4 +1,5 @@
 " These functions are the solvers used for the sampling of our flow matching models"
+" This script describe the sampling functions we have used for our model implementation"
 import numpy as np
 
 class solvers: 
