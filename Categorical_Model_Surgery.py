@@ -29,7 +29,7 @@ class Categorical_surgeon:
         Metrics4_data={}
         FM_instance = CFM(sigma=0.0) 
         ngen,nexp,model_type=3,5,"cont&cat"
-        N,K_dpl,Which_solver,problem_type=50,100,"Rg4","Class"
+        N,K_dpl,Which_solver,problem_type=50,70,"Rg4","Class"
         for k in range(1,self.dt_loader[0].shape[1]+1):
             Incremental_data=self.dt_loader[0][:,:k]
             mask_cat=self.dt_loader[-1][:k]

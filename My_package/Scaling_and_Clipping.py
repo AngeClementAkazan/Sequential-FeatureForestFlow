@@ -114,9 +114,9 @@ class Data_processing_functions:
     
     @staticmethod 
     def clipping(min,max,sol,dt_loader,msk_cat):
-#         for o in range(dt_loader.shape[1]):
-#             if np.all(np.equal(dt_loader[:,o], dt_loader[:,o].astype(int))) or  Data_processing_functions.all_integers(dt_loader[:,o]):
-#                 sol[:,o] = np.round(sol[:,o], decimals=0)
+        for o in range(dt_loader.shape[1]):
+            if np.all(np.equal(dt_loader[:,o], dt_loader[:,o].astype(int))) or  Data_processing_functions.all_integers(dt_loader[:,o]):
+                sol[:,o] = np.round(sol[:,o], decimals=0)
         small = (sol < min).astype(float)
         sol= small*min + (1-small)*sol
         big = (sol> max).astype(float)

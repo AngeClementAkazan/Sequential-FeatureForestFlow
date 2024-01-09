@@ -53,6 +53,9 @@ def data_loader(dt_name):
     X=np.concatenate((X, y.reshape(-1,1)), axis=1)
     X, y = copy.deepcopy(X), copy.deepcopy(y)
     return X,y,my_data,mask_cat    
+
+
+
 def fetch_tictactoe():
     dataset_dir = '/Users/ange-clementakazan/Documents/DIFFUSION_MODELS'
     if not os.path.isdir(dataset_dir):

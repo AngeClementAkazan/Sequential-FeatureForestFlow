@@ -7,13 +7,7 @@ from My_package.Scaling_and_Clipping import Data_processing_functions
 
 
 "Flow matching class"
-FM_instance = CFM(sigma=0.0) 
-
-" These functions are the solvers used for the sampling of our flow matching models"
-" This script describe the sampling functions we have used for our model implementation"
-
-
-                  
+FM_instance = CFM(sigma=0.0)                   
 class sampling:
                    
     def __init__(self,dt_loader,N,K_dpl,model_type,which_solver=None):
@@ -59,7 +53,7 @@ class sampling:
             x_k=x_fake= None
             # ODE solve
             X=data_from_1hotEnc #To get the same shape with dummyfied data in our solvers
-            Solver=solvers(data_4_training,self.K_dpl,train_c,mask_cat_4_1hotEnc,self.model_type,self.N)
+            Solver=solvers(data_4_training,train_c,mask_cat_4_1hotEnc,self.model_type,self.N)
 
             if self.which_solver == "Euler":
                 solution = Solver.euler_solve(x_k) # Euler solver

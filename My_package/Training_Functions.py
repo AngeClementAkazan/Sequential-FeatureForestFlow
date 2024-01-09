@@ -47,19 +47,17 @@ random_state=42):
         self.dt_loader= dt_loader
         self.n_t=n_t
         b, c = self.dt_loader.shape
-        X0 = np.random.normal(size=(b*self.K_dpl,c))        
-        X_train = np.zeros((c,self.n_t, b*self.K_dpl,1))              # [c,n_t, b*100, 1]  # Will contain the interpolation between x0 and x1 (xt)   
+        X0 = np.random.normal(size=(b,c))        
+        X_train = np.zeros((c,self.n_t, b,1))              # [c,n_t, b*100, 1]  # Will contain the interpolation between x0 and x1 (xt)   
         
-        y_train = np.zeros((c,self.n_t,b*self.K_dpl, 1))               # [c,n_t, b*100, 1]  # Will contain the output to predict (ut).reshape(-1,1)
-        
-        X1=np.tile(self.dt_loader,(self.K_dpl,1))
+        y_train = np.zeros((c,self.n_t,b, 1))               # [c,n_t, b*100, 1]  # Will contain the output to predict (ut).reshape(-1,1
         t_train = np.linspace(1e-3, 1, num=self.n_t)       
         for j in range(c):                                   # Fill the containers previously initialized with xt and ut
             for i in range(self.n_t):
-                t = np.ones(self.dt_loader.shape[0]*self.K_dpl)*t_train[i] # current t
-                _, xt, ut =  self.model.Extr_CFM(X0[:,j].reshape(-1,1), X1[:,j].reshape(-1,1), t=t)
+                t = np.ones(self.dt_loader.shape[0])*t_train[i] # current t
+                _, xt, ut =  self.model.Extr_CFM(X0[:,j].reshape(-1,1), self.dt_loader[:,j].reshape(-1,1), t=t)
                 X_train[j][i][:], y_train[j][i][:] = xt, ut
-        return X_train, y_train,X1
+        return X_train, y_train,self.dt_loader
 
 
     def train_cont(self,X_train, y_train):
@@ -132,7 +130,7 @@ random_state=42):
                             regr_[kk][i] = results_cont[current_i_cont]
                             current_i_cont += 1
                             
-        elif self.model_type== "cont_only":          #To choose only categorical data
+        elif self.model_type== "cont_only":          #To choose only model for continuous settings
             for k in range(c):  
                 for i in range(self.n_t):             
                         if k==0:
@@ -146,6 +144,9 @@ random_state=42):
                             X_train_chunks=np.concatenate(A,axis=1)
                             result = self.train_cont(X_train_chunks,y_train_chunk)
                         results_cont.append(result)
+
+             
+
 
             regr_ = [[None  for i in range(self.n_t)]  for k in range(c)  ]
             current_i_cont = 0
