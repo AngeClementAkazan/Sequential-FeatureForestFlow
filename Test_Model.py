@@ -24,7 +24,7 @@ class TestTrainingClass(unittest.TestCase):
         FM_instance = CFM(sigma=0.0) 
         Metrics4_data={}
         ngen,nexp,model_type=3,5,"cont_only"
-        N,K_dpl,Which_solver,problem_type=50,30,"Rg4", ["Class","Class","Class","Class","Reg"]
+        N,K_dpl,Which_solver,problem_type=50,100,"Rg4", ["Class","Class","Class","Class","Reg"]
         for i in range(len(data_set_name)):
             Metrics4_data[data_set_name[i]]=Metrics(ngen,nexp,sampling,data_loader(data_set_name[i]),data_set_name[i],
                                          N,K_dpl,Which_solver,model_type,problem_type[i],forest_flow=False,mask_cat=None)
