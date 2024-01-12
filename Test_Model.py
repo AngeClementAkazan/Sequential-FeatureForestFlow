@@ -24,14 +24,14 @@ class TestTrainingClass(unittest.TestCase):
         FM_instance = CFM(sigma=0.0) 
         Metrics4_data={}
         ngen,nexp,model_type=3,5,"cont_only"
-        N,K_dpl,Which_solver,problem_type=50,100,"Rg4", ["Class","Class","Class","Class","Reg"]
+        N,K_dpl,Which_solver,problem_type=70,80,"Euler", ["Class","Class","Class","Class","Reg"]
         for i in range(len(data_set_name)):
             Metrics4_data[data_set_name[i]]=Metrics(ngen,nexp,sampling,data_loader(data_set_name[i]),data_set_name[i],
                                          N,K_dpl,Which_solver,model_type,problem_type[i],forest_flow=False,mask_cat=None)
         Metric_dt=create_csv(data_set_name,Metrics4_data)
 
         #Save it as csv
-        Metric_dt.to_csv('/Users/ange-clementakazan/Documents/Metrics_4_Forest_Flow_Based_Variable_Sampling_with__RungeKutta_cont_models.csv',mode='w')
+        Metric_dt.to_csv('/Users/ange-clementakazan/Documents/Metrics_For4_Forest_Flow_Based_Variable_Sampling_with__Euler_cont_models.csv',mode='w')
 if __name__ == '__main__':
     unittest.main()
     

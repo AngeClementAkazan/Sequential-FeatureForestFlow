@@ -26,17 +26,23 @@ class solvers:
         i = int(round(t*(self.N-1)))
         out[:, k] = self.tr_container[0][count][i].predict(x)
         return out
-   
-    def my_model_cat(self,tr_container,dt_loader,k,cat_cont, x_prev):
+  
+    def my_model_cat(self,tr_container,dt_loader,k,cat_count, x_prev):
         b,c=self.dt_loader.shape
         out = np.zeros((b,c))
         if x_prev is None and k==0:
             out[:, k] = self.tr_container[1][0]# random sample
         else:
-            Array_4_Proba=self.tr_container[1][cat_cont].predict_proba(x_prev)
-            y_uniques=np.unique(dt_loader[:,k])
-            prop=np.array([np.mean(Array_4_Proba[:,i]) for i in range(Array_4_Proba.shape[1])])
-            out[:, k]=y_uniques[np.argmax(np.random.multinomial(1,prop, size=(b)), axis=1)]
+            # Array_4_Proba=self.tr_container[1][cat_cont].predict_proba(x_prev)
+            # y_uniques=np.unique(dt_loader[:,k])
+            # prop=np.array([np.mean(Array_4_Proba[:,i]) for i in range(Array_4_Proba.shape[1])])
+            # out[:, k]=y_uniques[np.argmax(np.random.multinomial(1,prop, size=(b)), axis=1)
+            x_pred=tr_container[1][cat_count].predict_proba(x_prev)
+            x_fake = np.zeros(b)
+            y_uniques,y_count=np.unique(self.dt_loader[:,k],return_counts=True)
+            for j in range(b):
+                x_fake[j] = y_uniques[np.argmax(np.random.multinomial(1, x_pred[j,:len(y_uniques)], size=1), axis=1)] # sample according to probability
+            out[:, k] =x_fake                       
         return out
 
   # Simple Euler ODE solver 
