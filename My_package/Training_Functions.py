@@ -51,7 +51,7 @@ random_state=42):
         X_train = np.zeros((c,self.n_t, b,1))              # [c,n_t, b*100, 1]  # Will contain the interpolation between x0 and x1 (xt)   
         
         y_train = np.zeros((c,self.n_t,b, 1))               # [c,n_t, b*100, 1]  # Will contain the output to predict (ut).reshape(-1,1
-        t_train = np.linspace(1e-3, 1, num=self.n_t)       
+        t_train = np.linspace(1e-9, 1, num=self.n_t)       
         for j in range(c):                                   # Fill the containers previously initialized with xt and ut
             for i in range(self.n_t):
                 t = np.ones(self.dt_loader.shape[0])*t_train[i] # current t

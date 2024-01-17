@@ -258,8 +258,7 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
             time_taken[method] += (end - start) / nexp
             for gen_i in range(ngen):
                 
-                Xy_fake_i = Xy_fake[gen_i]
-
+                Xy_fake_i = Xy_fake[gen_i][:Xy_train.shape[0]]
                 Xy_train_scaled, Xy_fake_scaled,_,_,_,_= Data_processing_functions.minmax_scale_dummy(Xy_train, Xy_fake_i, mask_cat,divide_by=2)
                 _, Xy_test_scaled, _,_,_,_= Data_processing_functions.minmax_scale_dummy(Xy_train, Xy_test,  mask_cat,divide_by=2)
      
