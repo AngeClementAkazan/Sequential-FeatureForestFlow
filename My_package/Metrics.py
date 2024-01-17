@@ -265,12 +265,8 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
      
                 # Wasserstein-2 based on L1 cost (after scaling)
                 if Xy_train.shape[0]<OTLIM:
-                    if dt_name=="tic-tac-toe":
-                        score_W1_train[method] += pot.emd2(pot.unif(Xy_train_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_train_scaled, Xy_fake_scaled, metric='cityblock'), numItermax=200000) / (nexp*ngen)
-                        score_W1_test[method] += pot.emd2(pot.unif(Xy_test_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_test_scaled, Xy_fake_scaled, metric='cityblock'), numItermax=200000) / (nexp*ngen)
-                    else:
-                        score_W1_train[method] += pot.emd2(pot.unif(Xy_train_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_train_scaled, Xy_fake_scaled, metric='cityblock'), numItermax=100000) / (nexp*ngen)
-                        score_W1_test[method] += pot.emd2(pot.unif(Xy_test_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_test_scaled, Xy_fake_scaled, metric='cityblock'), numItermax=100000) / (nexp*ngen)
+                    score_W1_train[method] += pot.emd2(pot.unif(Xy_train_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_train_scaled, Xy_fake_scaled, metric='cityblock')) / (nexp*ngen)
+                    score_W1_test[method] += pot.emd2(pot.unif(Xy_test_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_test_scaled, Xy_fake_scaled, metric='cityblock')) / (nexp*ngen)
                         
 
                 if dt_loader[0].shape[1]==1:
