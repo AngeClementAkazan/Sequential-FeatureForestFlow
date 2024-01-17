@@ -70,12 +70,8 @@ class Data_processing_functions:
         n = X_train.shape[0]
         if len(cat_ind_only) > 0:                                
             X_train_test, df_names_before, df_names_after,mask= Data_processing_functions.Dummify(np.concatenate((X_train_, X_test_), axis=0),cat_ind_only,divide_by, drop_first=False)
-            X_train_ = X_train_test[0:n,:]
-            X_test_ = X_train_test[n:,:]
-        else:
-            X_train_ = X_train_test[0:n,:]
-            X_test_ = X_train_test[n:,:]
-
+        X_train_ = X_train_test[0:n,:]
+        X_test_ = X_train_test[n:,:]
         return X_train_, X_test_, scaler,mask, df_names_before, df_names_after
 
     "Rounding for the categorical variables which are dummy-coded and then remove dummy-coding"
