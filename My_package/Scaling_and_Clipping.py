@@ -111,7 +111,7 @@ class Data_processing_functions:
     
 #     @staticmethod       
 
-    
+   
     @staticmethod 
     def clipping(min,max,sol,dt_loader,msk_cat):
         for o in range(dt_loader.shape[1]):
