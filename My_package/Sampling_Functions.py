@@ -9,19 +9,21 @@ from My_package.Scaling_and_Clipping import Data_processing_functions
 "Flow matching class"
 FM_instance = CFM(sigma=0.0)                   
 class sampling:
-                   
-    def __init__(self,dt_loader,N,K_dpl,model_type,which_solver=None):
+                  
+    def __init__(self,dt_loader,N,K_dpl,model_type,cat_sampler_type,which_solver=None):
         self.dt_loader=dt_loader 
         self.N=N
         self.K_dpl=K_dpl
         self.which_solver=which_solver 
         self.model_type=model_type 
+        self.cat_sampler_type=cat_sampler_type
         """ dt_loader: is the data to be inputted
             K_dpl: is the number of time we duplicate our data
             mask_cat: is the mask for categorical data (list containing True for categorical and False for Continuous
             N: is the number of noise level we are dealing with 
             which_solver: takes two values: {Euler: for Euler solver or RG4: for Runge Kutta solver}
             model_type: specifies whether we have a mixed model (regressor and classification) or regressor only 
+            cat_sampler_type: determine whether we use the Xgboost model prediction directly for sampling(in that case the argument take the value "model_prediction-based") or we use the output probability of our Xgboost and then use a multinoimial sampler(and the argument take "proba-based")
         """
 
     def Final_training(self,dta,N,K_dpl,mask_cat):
@@ -48,13 +50,11 @@ class sampling:
              # Sanity check, must remove observations with only missing data
             obs_to_remove = np.isnan(dta).all(axis=1)
             dta = dta[~obs_to_remove]
-
             train_c,data_from_1hotEnc,data_4_training,scaler, cat_ind_b4_1hotEnc,mask_cat_4_1hotEnc,X_names_before, X_names_after=self.Final_training(dta,self.N,self.K_dpl,msk_ct)  #Training container, dummified and transformed data plus the new mask 
             x_k=x_fake= None
             # ODE solve
             X=data_from_1hotEnc #To get the same shape with dummyfied data in our solvers
-            Solver=solvers(data_4_training,train_c,mask_cat_4_1hotEnc,self.model_type,self.N)
-
+            Solver=solvers(data_4_training,train_c,self.cat_sampler_type,mask_cat_4_1hotEnc,self.model_type,self.N)
             if self.which_solver == "Euler":
                 solution = Solver.euler_solve(x_k) # Euler solver
                 

@@ -40,7 +40,7 @@ class Data_processing_functions:
 
         return result.all()
     @staticmethod
-    def Dummify(X, cat_indexes, divide_by, drop_first=False):
+    def Dummify(X, cat_indexes, divide_by=0, drop_first=False):
         df = pd.DataFrame(X, columns = [str(i) for i in range(X.shape[1])]) # to Pandas
         df_names_before = df.columns
         for i in cat_indexes:
@@ -70,9 +70,9 @@ class Data_processing_functions:
         n = X_train.shape[0]
         if len(cat_ind_only) > 0:                                
             X_train_test, df_names_before, df_names_after,mask= Data_processing_functions.Dummify(np.concatenate((X_train_, X_test_), axis=0),cat_ind_only,divide_by, drop_first=False)
-        X_train_ = X_train_test[0:n,:]
-        X_test_ = X_train_test[n:,:]
-        return X_train_, X_test_, scaler,mask, df_names_before, df_names_after
+        X_train_t = X_train_test[0:n,:]
+        X_test_t= X_train_test[n:,:]
+        return X_train_t, X_test_t, scaler,mask, df_names_before, df_names_after
 
     "Rounding for the categorical variables which are dummy-coded and then remove dummy-coding"
     @staticmethod
@@ -111,7 +111,7 @@ class Data_processing_functions:
     @staticmethod 
     def clipping(min,max,sol,dt_loader,msk_cat):
         for o in range(dt_loader.shape[1]):
-            if np.all(np.equal(dt_loader[:,o], dt_loader[:,o].astype(int))) or  Data_processing_functions.all_integers(dt_loader[:,o]):
+            if  Data_processing_functions.all_integers(dt_loader[:,o]):
                 sol[:,o] = np.round(sol[:,o], decimals=0)
         small = (sol < min).astype(float)
         sol= small*min + (1-small)*sol

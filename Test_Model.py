@@ -23,11 +23,12 @@ class TestTrainingClass(unittest.TestCase):
         data_set_name=["iris","wine","congress","tic-tac-toe","heart_disease"]
         FM_instance = CFM(sigma=0.0) 
         Metrics4_data={}
-        ngen,nexp,model_type=3,5,"cont_only"
-        N,K_dpl,Which_solver,problem_type=70,80,"Euler", ["Class","Class","Class","Class","Reg"]
+        ngen,nexp,cat_sampler_type,model_type=2,2,"proba_based","cont_only"
+        N,K_dpl,Which_solver,problem_type=50,100,"Euler", ["Class","Class","Class","Class","Reg"]
         for i in range(len(data_set_name)):
             Metrics4_data[data_set_name[i]]=Metrics(ngen,nexp,sampling,data_loader(data_set_name[i]),data_set_name[i],
-                                         N,K_dpl,Which_solver,model_type,problem_type[i],forest_flow=False,mask_cat=None)
+                                           N,K_dpl,Which_solver,model_type,cat_sampler_type,problem_type[i],forest_flow=None,mask_cat=None)
+            Metrics4_data[data_set_name[i]][0].to_csv(f'/Users/ange-clementakazan/Documents/Metrics_Euler_{i}.csv',mode='w')
         Metric_dt=create_csv(data_set_name,Metrics4_data)
 
         #Save it as csv
@@ -35,7 +36,7 @@ class TestTrainingClass(unittest.TestCase):
 if __name__ == '__main__':
     unittest.main()
     
-    
+   
     
     
     
