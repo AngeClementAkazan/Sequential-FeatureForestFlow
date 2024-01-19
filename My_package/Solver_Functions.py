@@ -3,18 +3,19 @@
 import numpy as np
 
 class solvers: 
-    def __init__(self,dt_loader,tr_container,mask_cat,model_type,N):
+    def __init__(self,dt_loader,tr_container,cat_sampler_type,mask_cat,model_type,N):
         self.dt_loader=dt_loader 
         self.tr_container=tr_container
         self.mask_cat=mask_cat 
         self.N=N 
         self.model_type=model_type
-        
+        self.cat_sampler_type =cat_sampler_type
         """ dt_loader: is the dt_loader to be inputted after dummy encoding
             tr_container: is the tuple that contains the lists for both categorical and continuous XGBoost models
             mask_cat: is the mask for categorical data (list containing True for categorical and False for Continuous) after dummy encoding
-            N: is the number of noise level we are dealing with 
-        """
+            N: is the number of noise level we are dealing with
+            cat_sampler_type: determine whether we use the Xgboost model prediction directly for sampling(in that case the argument take the value "model_prediction-based") or we use the output probability of our Xgboost and then use a multinoimial sampler(and the argument take "proba-based")
+       """
        
     def my_model_cont(self,tr_container,dt_loader,t,k,count,N,x_k, x_prev):
         if x_prev is None:                
@@ -32,13 +33,17 @@ class solvers:
         out = np.zeros((b,c))
         if x_prev is None and k==0:
             out[:, k] = self.tr_container[1][0]# random sample
-        else:
+        if self.cat_sampler_type=="model_prediction_based":
+            out[:, k]=tr_container[1][cat_count].predict(x_prev)
+        elif self.cat_sampler_type=="proba_based":
             x_pred=tr_container[1][cat_count].predict_proba(x_prev)
             x_fake = np.zeros(b)
             y_uniques,y_count=np.unique(self.dt_loader[:,k],return_counts=True)
             for j in range(b):
                 x_fake[j] = y_uniques[np.argmax(np.random.multinomial(1, x_pred[j,:len(y_uniques)], size=1), axis=1)] # sample according to probability
-            out[:, k] =x_fake                      
+            out[:, k] =x_fake     
+        else:
+            raise Exception("Choose the right sampling mode")                
         return out
 
   # Simple Euler ODE solver 

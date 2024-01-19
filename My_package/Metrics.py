@@ -191,7 +191,7 @@ def define_data_class_or_regr(X,y,n):
     return Xy_train, Xy_test,X_train, X_test, y_train, y_test
 
 def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
-            N,K_dpl,which_solver,model_type,problem_type=None,method=None,forest_flow=None,mask_cat=None):
+            N,K_dpl,which_solver,model_type,cat_sampler_type,problem_type=None,method=None,forest_flow=None,mask_cat=None):
     """ ngen and nexp: Number of generation and experiment
         diffusion_model: the diffusion function you have to input ( the parameters should be dt_loader,i,N and K_dpl)
         dt_loader and dt_name: are respectively the data  and the name of the data you imputted
@@ -200,9 +200,9 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
         N,K_dpl,which_solver,method: are the number of noise levels, the number of duplication, a string that provide the name of the solver we want the options are (Euler: for euler solver, Rg4: for: Runge Kutta 4th order, or Any_string: for both).
         mask_cat: is the list that shows wether or not the feature of your data set are categorical
         """
-        
+       
     OTLIM = 5000
-    if forest_flow==False:
+    if forest_flow==None:
         method="VSFF"
     else:
         method="Forest Flow"
@@ -249,17 +249,17 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
        
             start = time.time()
             
-            if forest_flow==False:
-                Xy_fake=np.array([diffusion_model(dt_loader,N,K_dpl,model_type,which_solver).sample() for k in range(ngen)])
-              
+            if forest_flow== None:
+                Xy_fake=np.array([diffusion_model(dt_loader,N,K_dpl,model_type,cat_sampler_type,which_solver).sample() for k in range(ngen)])
+             
             else:
                 Xy_fake= np.array([diffusion_model(dt_loader,N,K_dpl) for k in range(ngen)])
             end = time.time()
             time_taken[method] += (end - start) / nexp
             for gen_i in range(ngen):
-                
-                Xy_fake_i = Xy_fake[gen_i][:Xy_train.shape[0]]
-                Xy_train_scaled, Xy_fake_scaled,_,_,_,_= Data_processing_functions.minmax_scale_dummy(Xy_train, Xy_fake_i, mask_cat,divide_by=2)
+                Xy_fake_i = Xy_fake[gen_i]
+                Xy_fake_it = Xy_fake[gen_i][:Xy_train.shape[0]]
+                Xy_train_scaled, Xy_fake_scaled,_,_,_,_= Data_processing_functions.minmax_scale_dummy(Xy_train, Xy_fake_it, mask_cat,divide_by=2)
                 _, Xy_test_scaled, _,_,_,_= Data_processing_functions.minmax_scale_dummy(Xy_train, Xy_test,  mask_cat,divide_by=2)
      
                 # Wasserstein-2 based on L1 cost (after scaling)
@@ -267,7 +267,7 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
                     score_W1_train[method] += pot.emd2(pot.unif(Xy_train_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_train_scaled, Xy_fake_scaled, metric='cityblock')) / (nexp*ngen)
                     score_W1_test[method] += pot.emd2(pot.unif(Xy_test_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_test_scaled, Xy_fake_scaled, metric='cityblock')) / (nexp*ngen)
                         
-
+                
                 if dt_loader[0].shape[1]==1:
                     X_fake,y_fake = Xy_fake_i[:,0].reshape(-1,1),Xy_fake_i[:,0]
                 else:

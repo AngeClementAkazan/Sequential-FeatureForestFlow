@@ -13,12 +13,12 @@ from sklearn.preprocessing import MinMaxScaler
 class Training():
     def __init__(self,model,dt_loader,mask_cat,model_type,K_dpl,n_t,
 n_estimators=100,
-learning_rate=0.3,
+learning_rate=0.9,
 tree_method='hist',
 reg_lambda=1.0,
 reg_alpha=0.0,
 subsample=1.0, 
-eta=0.3,  
+eta=0.7,  
 max_depth=7,  
 colsample_bytree=0.8, 
 gamma=0,  
@@ -51,7 +51,7 @@ random_state=42):
         X_train = np.zeros((c,self.n_t, b,1))              # [c,n_t, b*100, 1]  # Will contain the interpolation between x0 and x1 (xt)   
         
         y_train = np.zeros((c,self.n_t,b, 1))               # [c,n_t, b*100, 1]  # Will contain the output to predict (ut).reshape(-1,1
-        t_train = np.linspace(1e-9, 1, num=self.n_t)       
+        t_train = np.linspace(1e-3, 1, num=self.n_t)       
         for j in range(c):                                   # Fill the containers previously initialized with xt and ut
             for i in range(self.n_t):
                 t = np.ones(self.dt_loader.shape[0])*t_train[i] # current t
@@ -61,25 +61,22 @@ random_state=42):
 
 
     def train_cont(self,X_train, y_train):
-        model = xgb.XGBRegressor(n_estimators=self.n_estimators, objective='reg:squarederror', eta=0.107, max_depth=self.max_depth,reg_lambda=self.reg_lambda, reg_alpha=self.reg_alpha, subsample=self.subsample, seed=666, tree_method=self.tree_method, device='cpu')
+        model = xgb.XGBRegressor(n_estimators=self.n_estimators, objective='reg:squarederror', eta=0.3, max_depth=self.max_depth,reg_lambda=self.reg_lambda, reg_alpha=self.reg_alpha, subsample=self.subsample, seed=666, tree_method=self.tree_method, device='cpu')
         y_no_miss = ~np.isnan(y_train.ravel())
         model.fit(X_train[y_no_miss,:], y_train[y_no_miss])
         return model
 
     def train_cat(self,X_train, y_train ):
         model = XGBClassifier(n_estimators=self.n_estimators,
-            objective='multi:softmax' if len(np.unique(y_train)) > 2 else 'binary:logistic',
-            eta=0.307,
-            learning_rate=0.202,
+            objective='binary:logistic',
+            learning_rate=0.1,
             max_depth=self.max_depth,
             reg_lambda=self.reg_lambda,
             reg_alpha=self.reg_alpha,
-            subsample=self.subsample,
-            tree_method=self.tree_method,
-            use_label_encoder=False,  # For XGBoost 1.3.0 and above
-            eval_metric='mlogloss' if len(np.unique(y_train)) > 2 else 'logloss',
-            seed=666,
-            device='cpu')
+            subsample=self.subsample,n_jobs=-1, num_parallel_tree=1,
+            tree_method=self.tree_method, random_state= self.random_state, device='cpu')
+            # use_label_encoder=False,  # For XGBoost 1.3.0 and above
+            # eval_metric='mlogloss' if len(np.unique(y_train)) > 2 else 'logloss',
         y_no_miss = ~np.isnan(y_train.ravel())
         model.fit(X_train[y_no_miss,:], y_train[y_no_miss])
         return model
