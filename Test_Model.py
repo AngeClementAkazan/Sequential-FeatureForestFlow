@@ -23,16 +23,17 @@ class TestTrainingClass(unittest.TestCase):
         data_set_name=["iris","wine","congress","tic-tac-toe","heart_disease"]
         FM_instance = CFM(sigma=0.0) 
         Metrics4_data={}
-        ngen,nexp,cat_sampler_type,model_type=2,2,"proba_based","cont_only"
-        N,K_dpl,Which_solver,problem_type=50,100,"Euler", ["Class","Class","Class","Class","Reg"]
+        ngen,nexp,cat_sampler_type,model_type=1,1,"proba_based","cont&cat"
+        N,K_dpl,Which_solver,problem_type=50,50,"Euler", ["Class","Class","Class","Class","Reg"]
         for i in range(len(data_set_name)):
-            Metrics4_data[data_set_name[i]]=Metrics(ngen,nexp,sampling,data_loader(data_set_name[i]),data_set_name[i],
+            if data_set_name[i]=="iris":
+                Metrics4_data[data_set_name[i]]=Metrics(ngen,nexp,sampling,data_loader(data_set_name[i]),data_set_name[i],
                                            N,K_dpl,Which_solver,model_type,cat_sampler_type,problem_type[i],forest_flow=None,mask_cat=None)
-            Metrics4_data[data_set_name[i]][0].to_csv(f'/Users/ange-clementakazan/Documents/Metrics_Euler_{i}.csv',mode='w')
-        Metric_dt=create_csv(data_set_name,Metrics4_data)
+                Metrics4_data[data_set_name[i]][0].to_csv(f'/Users/ange-clementakazan/Documents/Metrics_Euler_{i}.csv',mode='w')
+        # Metric_dt=create_csv(data_set_name,Metrics4_data)
 
         #Save it as csv
-        Metric_dt.to_csv('/Users/ange-clementakazan/Documents/Metrics_For4_Forest_Flow_Based_Variable_Sampling_with__Euler_cont_models.csv',mode='w')
+        # Metric_dt.to_csv('/Users/ange-clementakazan/Documents/Metrics_For4_Forest_Flow_Based_Variable_Sampling_with__Euler_cont_models.csv',mode='w')
 if __name__ == '__main__':
     unittest.main()
     
