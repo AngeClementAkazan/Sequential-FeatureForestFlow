@@ -13,19 +13,18 @@ class Data_processing_functions:
         
         df_names_before = df.columns
 
-        cat_indexes = []  # List to store categorical column indexes
-
+        mask_ = []  # List to store categorical column indexes
         for i in range(len(mask)):
             if mask[i]==True:
                 df = pd.get_dummies(df, columns=[str(i)], prefix=str(i), dtype='float', drop_first=drop_first)
         for j in df.columns:
             if "_" in j:  # Check if the last added column has "_"
-                cat_indexes.append(True)
+                mask_.append(True)
             else:
-                cat_indexes.append(False)
+                mask_.append(False)
         df_names_after = df.columns
         df = df.to_numpy()
-        return df, df_names_before, df_names_after, cat_indexes
+        return df, df_names_before, df_names_after, mask_
     
     @staticmethod
     def all_integers(column):
