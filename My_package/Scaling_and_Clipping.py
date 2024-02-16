@@ -6,13 +6,10 @@ from sklearn.preprocessing import MinMaxScaler
 
 " This script contains data processing functions"
 class Data_processing_functions:
-
     @staticmethod
     def dummify(X,mask,  drop_first=True):
-        df = pd.DataFrame(X, columns=[str(i) for i in range(X.shape[1])])  # Convert to Pandas
-        
+        df = pd.DataFrame(X, columns=[str(i) for i in range(X.shape[1])])  # Convert to Pandas       
         df_names_before = df.columns
-
         mask_ = []  # List to store categorical column indexes
         for i in range(len(mask)):
             if mask[i]==True:
@@ -30,14 +27,12 @@ class Data_processing_functions:
     def all_integers(column):
         # Check if all elements are integers
         are_integers = np.equal(column, np.round(column))
-
         # Check if the decimal part of all elements is zero
         decimal_part_is_zero = np.equal(np.modf(column)[0], 0)
-
         # Combine the two conditions
         result = np.logical_and(are_integers, decimal_part_is_zero)
-
         return result.all()
+    
     @staticmethod
     def Dummify(X, cat_indexes, divide_by=0, drop_first=False):
         df = pd.DataFrame(X, columns = [str(i) for i in range(X.shape[1])]) # to Pandas
@@ -47,7 +42,6 @@ class Data_processing_functions:
             if divide_by > 0: # needed for L1 distance to equal 1 when categories are different
                 filter_col = [col for col in df if col.startswith(str(i) + '_')]
                 df[filter_col] = df[filter_col] / divide_by
-
         df_names_after = df.columns
         df = df.to_numpy()
         cat_index=Data_processing_functions.dummify(X,cat_indexes,  drop_first=True)[-1]
@@ -115,5 +109,5 @@ class Data_processing_functions:
         small = (sol < min).astype(float)
         sol= small*min + (1-small)*sol
         big = (sol> max).astype(float)
-        sol = big*max + (1-big)*sol
+        sol = big*max + (1-big)*sol 
         return sol

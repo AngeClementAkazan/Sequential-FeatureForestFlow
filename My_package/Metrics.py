@@ -191,16 +191,17 @@ def define_data_class_or_regr(X,y,n):
     return Xy_train, Xy_test,X_train, X_test, y_train, y_test
 
 def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
-            N,K_dpl,which_solver,model_type,cat_sampler_type,problem_type=None,method=None,forest_flow=None,mask_cat=None):
+            N,K_dpl,which_solver,model_type,Use_OneHotEnc,cat_sampler_type,problem_type=None,method=None,forest_flow=None,mask_cat=None):
     """ ngen and nexp: Number of generation and experiment
         diffusion_model: the diffusion function you have to input ( the parameters should be dt_loader,i,N and K_dpl)
         dt_loader and dt_name: are respectively the data  and the name of the data you imputted
         problem_type: takes two arguments {Regression: if the data was studied for a regression or Classification: if it was for a classification}
         model_type: chooses whether we opt for regressor only or regressor mixed with classifier
         N,K_dpl,which_solver,method: are the number of noise levels, the number of duplication, a string that provide the name of the solver we want the options are (Euler: for euler solver, Rg4: for: Runge Kutta 4th order, or Any_string: for both).
-        mask_cat: is the list that shows wether or not the feature of your data set are categorical
+        mask_cat: is the list that shows wether or not the feature of your data set are categorical 
+        Use_OneHotEnc: Determine whether or not we will use one hot encoding (takes argument True or False)
         """
-       
+      
     OTLIM = 5000
     if forest_flow==None:
         method="VSFF"
@@ -234,7 +235,8 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
         for test_type2 in ['mean','lin','linboost', 'tree', 'treeboost']:
             R2[method][test_type][test_type2] = 0.0
             f1[method][test_type][test_type2] = 0.0
-    mask_cat=dt_loader[-1]  #This is the mask list that represent all the column that are categorical and those that are not
+    if mask_cat== None:
+        mask_cat=dt_loader[-1] #This is the mask list that represent all the column that are categorical and those that are not
     
     cat_indexes=[i for i in range(len(mask_cat)) if mask_cat[i]]
     if dt_loader[0].shape[1]==1:
@@ -247,10 +249,9 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
     for n in range(nexp):
             Xy_train, Xy_test,X_train, X_test, y_train, y_test=define_data_class_or_regr(X,y,n)
        
-            start = time.time()
-            
+            start = time.time()      
             if forest_flow== None:
-                Xy_fake=np.array([diffusion_model(dt_loader,N,K_dpl,model_type,cat_sampler_type,which_solver).sample() for k in range(ngen)])
+                Xy_fake=np.array([diffusion_model(dt_loader,N,K_dpl,model_type,Use_OneHotEnc,cat_sampler_type,which_solver).sample() for k in range(ngen)])
              
             else:
                 Xy_fake= np.array([diffusion_model(dt_loader,N,K_dpl) for k in range(ngen)])
@@ -274,15 +275,15 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
                     X_fake, y_fake = Xy_fake_i[:,:-1], Xy_fake_i[:,-1]
 
                 # Trained on real data
-                f1_real, R2_real = test_on_multiple_models(X_train, y_train, X_test, y_test,  cat_indexes[:X_train.shape[1]],problem_type,  nexp)
+                f1_real, R2_real = test_on_multiple_models(X_train, y_train, X_test, y_test, mask_cat[:-1],problem_type,  nexp)
 
                 # Trained on fake data
-                f1_fake, R2_fake = test_on_multiple_models(X_fake, y_fake, X_test, y_test,cat_indexes[:X_fake.shape[1]],problem_type,  nexp)
+                f1_fake, R2_fake = test_on_multiple_models(X_fake, y_fake, X_test, y_test,mask_cat[:-1],problem_type,  nexp)
 # 
                 # Trained on real data and fake data
                 X_both = np.concatenate((X_train,X_fake), axis=0)
                 y_both = np.concatenate((y_train,y_fake))
-                f1_both, R2_both = test_on_multiple_models(X_both, y_both, X_test, y_test,cat_indexes[:X_both.shape[1]],problem_type,  nexp)
+                f1_both, R2_both = test_on_multiple_models(X_both, y_both, X_test, y_test,mask_cat[:-1],problem_type,  nexp)
                 
                 for key in ['mean', 'lin', 'linboost', 'tree', 'treeboost']:
                     f1[method]['real'][key] += f1_real[key] / (nexp*ngen)
@@ -335,4 +336,4 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
             csv_4_ls.append(i)
     m_dt.loc[0]=csv_4_ls
     return m_dt,Xy_fake
-#     method_index_start = 0 #  so we loop back againsample_Euler(X,y, euler_solve,runge_kutta_solve,b,c,n_t)Metric,Sample=
+#     method_index_start = 0 #  so we loop back againsample_Euler(X,y, euler_solve,runge_kutta_solve,b,c,n_t)Metric,Sample

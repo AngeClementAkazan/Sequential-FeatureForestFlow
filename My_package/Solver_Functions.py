@@ -10,11 +10,11 @@ class solvers:
         self.N=N 
         self.model_type=model_type
         self.cat_sampler_type =cat_sampler_type
-        """ dt_loader: is the data to be inputted after dummy encoding
+        """ dt_loader: is the data to be inputted after dummy encoding, if there was
             tr_container: is the tuple that contains the lists for both categorical and continuous XGBoost models
             mask_cat: is the mask for categorical data (list containing True for categorical and False for Continuous) after dummy encoding (depending on whether cat_sampler_type is model-predict-based)
             N: is the number of noise level we are dealing with
-            cat_sampler_type: determine whether we use the Xgboost model prediction directly for sampling(in that case the argument take the value "model_prediction-based") or we use the output probability of our Xgboost and then use a multinoimial sampler(and the argument take "proba-based")
+            cat_sampler_type: determine whether we use the Xgboost model prediction directly for sampling(in that case the argument take the value "model_prediction_based") or we use the output probability of our Xgboost and then use a multinoimial sampler(and the argument take "proba_based")
        """
        
     def my_model_cont(self,tr_container,dt_loader,t,k,count,N,x_k, x_prev):
@@ -25,14 +25,14 @@ class solvers:
         b,c=self.dt_loader.shape
         out = np.zeros((b,c)) # [b, c]
         i = int(round(t*(self.N-1)))
-        out[:, k] = self.tr_container[0][count][i].predict(x)
+        out[:, k] = self.tr_container[0][count][i].predict(x)[:b]
         return out
  
     def my_model_cat(self,tr_container,dt_loader,k,cat_count, x_prev):
         b,c=self.dt_loader.shape
         out = np.zeros((b,c))
         if x_prev is None and k==0:
-            out[:, k] = self.tr_container[1][0]# random sample
+            out[:, k] = self.tr_container[1][0][:b]# random sample
         else:
             if self.cat_sampler_type=="model_prediction_based":
                 out[:, k]=tr_container[1][cat_count].predict(x_prev)
@@ -107,8 +107,13 @@ class solvers:
                     t=0
                     x_fake=np.random.normal(size=(b,1))
                     for i in range(self.N-1):
-                        x_fake = x_fake + h*self.my_model_cont(self.tr_container,self.dt_loader,t,k,cont_count,self.N,x_fake, x_prev)[:,k].reshape(-1,1)                     #[:,k] because we want to return the k th column predicted by the model
+                        k1 = h * self.my_model_cont(self.tr_container,self.dt_loader,t,k,cont_count,self.N,x_fake, x_prev=x_prev)[:,k].reshape(-1,1)
+                        k2 = h * self.my_model_cont(self.tr_container,self.dt_loader,t + h / 2,k,cont_count,self.N, x_fake + k1 / 2, x_prev=x_prev)[:,k].reshape(-1,1)
+                        k3 = h * self.my_model_cont(self.tr_container,self.dt_loader,t + h / 2,k,cont_count,self.N, x_fake + k2 / 2, x_prev=x_prev)[:,k].reshape(-1,1)
+                        k4 = h * self.my_model_cont(self.tr_container,self.dt_loader,t + h,k,cont_count,self.N, x_fake + k3, x_prev=x_prev)[:,k].reshape(-1,1)
+                        x_fake = x_fake + (k1 + 2 * k2 + 2 * k3 + k4) / 6                   #[:,k] because we want to return the k th column predicted by the model
                         t = t + h
+                
                     cont_count+=1
                 if x_prev is None:
                     x_prev =x_fake     
@@ -120,7 +125,11 @@ class solvers:
                 t=0
                 x_fake=np.random.normal(size=(b,1))
                 for i in range(self.N-1):
-                    x_fake =x_fake + h*self.my_model_cont(self.tr_container,self.dt_loader,t,k,cont_count,self.N,x_fake, x_prev)[:,k].reshape(-1,1)                     # k because we want to return the k th column preddicted by the model
+                    k1 = h * self.my_model_cont(self.tr_container,self.dt_loader,t,k,cont_count,self.N,x_fake, x_prev=x_prev)[:,k].reshape(-1,1)
+                    k2 = h * self.my_model_cont(self.tr_container,self.dt_loader,t + h / 2,k,cont_count,self.N, x_fake + k1 / 2, x_prev=x_prev)[:,k].reshape(-1,1)
+                    k3 = h * self.my_model_cont(self.tr_container,self.dt_loader,t + h / 2,k,cont_count,self.N, x_fake + k2 / 2, x_prev=x_prev)[:,k].reshape(-1,1)
+                    k4 = h * self.my_model_cont(self.tr_container,self.dt_loader,t + h,k,cont_count,self.N, x_fake + k3, x_prev=x_prev)[:,k].reshape(-1,1)
+                    x_fake = x_fake + (k1 + 2 * k2 + 2 * k3 + k4) / 6                   #[:,k] because we want to return the k th column predicted by the model
                     t = t + h
                 cont_count+=1
                 if x_prev is None:
