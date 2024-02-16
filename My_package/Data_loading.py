@@ -45,6 +45,16 @@ def data_loader(dt_name):
         X=my_data['data']
         y=my_data['target']
         mask_cat=[True, True, True ,True, True, True,True, True,True,True]   
+    elif dt_name== "breast_cancer":
+        my_data=fetch_breast_cancer_diagnostic()
+        X=my_data['data']
+        y=my_data['target']
+        mask_cat=[False]*30+[True]
+    elif dt_name== "ionosphere":
+        my_data=fetch_ionosphere()
+        X=my_data['data']
+        y=my_data['target']
+        mask_cat=[True]+[False]*32+[True]
     else:
         raise Exception('Download your data')
     new_perm = np.random.permutation(X.shape[0])
@@ -57,7 +67,7 @@ def data_loader(dt_name):
 
 
 def fetch_tictactoe():
-    dataset_dir = '/Users/ange-clementakazan/Documents/DIFFUSION_MODELS'
+    dataset_dir = '/Users/ange-clementakazan/Documents/DIFFUSION_MODELS/Data_set/tictactoe'
     if not os.path.isdir(dataset_dir):
         os.mkdir(dataset_dir)
         
@@ -70,7 +80,7 @@ def fetch_tictactoe():
 
     data_path = os.path.join(dataset_dir, 'tic-tac-toe.data')
     df = pd.read_csv(data_path, delimiter=',', header=None)
-    
+   
     dataset = {}
     dataset['data'] = np.zeros(df.values[:, :-1].shape)
     
@@ -81,7 +91,7 @@ def fetch_tictactoe():
 
     return dataset
 def fetch_congress():
-    dataset_dir = '/Users/ange-clementakazan/Documents/DIFFUSION_MODELS'
+    dataset_dir = '/Users/ange-clementakazan/Documents/DIFFUSION_MODELS/Data_set/Congress'
     if not os.path.isdir(dataset_dir):
         os.mkdir(dataset_dir)
     url = 'https://archive.ics.uci.edu/static/public/105/congressional+voting+records.zip'
@@ -95,11 +105,65 @@ def fetch_congress():
     df = pd.read_csv(data_path, delimiter=',', header=None)
     
     dataset = {}
-    dataset['data'] = np.zeros(df.values[:, :-1].shape)
+    dataset['data'] = np.zeros(df.values[:,1:].shape)
     
     for i in range(dataset['data'].shape[1]):
         dataset['data'][:, i] = pd.factorize(df.values[:, i])[0].astype(int)
     
-    dataset['target'] = pd.factorize(df.values[:, -1])[0].astype(int)
+    dataset['target'] = pd.factorize(df.values[:, 0])[0].astype(int)
 
     return dataset
+
+def fetch_breast_cancer_diagnostic():
+    if not os.path.isdir('/Users/ange-clementakazan/Documents/DIFFUSION_MODELS/Data_set/fetch_breast_cancer'):
+        os.mkdir('/Users/ange-clementakazan/Documents/DIFFUSION_MODELS/Data_set/fetch_breast_cancer')
+        url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/wdbc.data'
+        wget.download(url, out='/Users/ange-clementakazan/Documents/DIFFUSION_MODELS/Data_set/fetch_breast_cancer')
+
+    with open('/Users/ange-clementakazan/Documents/DIFFUSION_MODELS/Data_set/fetch_breast_cancer/wdbc.data', 'rb') as f:
+        df = pd.read_csv(f, delimiter=',', header=None)
+        Xy = {}
+        Xy['data'] = df.values[:, 2:].astype('float')
+        Xy['target'] = pd.factorize(df.values[:, 1])[0] # str to numeric
+
+    return Xy
+
+def fetch_ionosphere():
+    if not os.path.isdir('/Users/ange-clementakazan/Documents/DIFFUSION_MODELS/Data_set/ionosphere'):
+        os.mkdir('/Users/ange-clementakazan/Documents/DIFFUSION_MODELS/Data_set/ionosphere')
+        url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/ionosphere/ionosphere.data'
+        wget.download(url, out='/Users/ange-clementakazan/Documents/DIFFUSION_MODELS/Data_set/ionosphere')
+
+    with open('/Users/ange-clementakazan/Documents/DIFFUSION_MODELS/Data_set/ionosphere/ionosphere.data', 'rb') as f:
+        df = pd.read_csv(f, delimiter=',', header = None)
+        Xy = {}
+        Xy['data'] = np.concatenate((df.values[:, 0:1].astype('float'), df.values[:, 2:-1].astype('float')), axis=1) # removing the secon variable which is always 0
+        Xy['target'] =  pd.factorize(df.values[:, -1])[0] # str to numeric
+
+    return Xy
+def fetch_random_data(perct_cat,num_samples,num_features):
+    # Set parameters
+    cont_var_n=  num_features-num_features*perct_cat
+    cat_var_n=  num_features*perct_cat
+    #Build the continuous block
+    # Mean vector
+    mean = np.zeros(int( cont_var_n))
+    # Covariance matrix (identity matrix)
+    cov_matrix = np.eye(num_features)
+    # Generate continous data from multivariate Gaussian distribution
+    cont_data = np.random.multivariate_normal(mean, cov_matrix, size=num_samples)
+    
+
+    # # Convert to pandas DataFrame
+    # columns = [f'feature_{i}' for i in range(num_features)]
+    # df = pd.DataFrame(data, columns=columns)
+
+
+# num_samples = 2000  # Total number of samples
+# num_features = 15   # Total number of features
+# cont_var_n= 15
+# perct_cat=0.8
+
+# # Mean vector
+# mean =int(num_features*perct_cat)
+# print(mean)

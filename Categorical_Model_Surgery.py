@@ -41,8 +41,7 @@ class Categorical_surgeon:
                                          N,K_dpl,Which_solver,model_type,problem_type,forest_flow=False,mask_cat=None)
         Metric_dt=create_csv(data_set_name,Metrics4_data)
         return Metrics4_data
-    
-data_set=["congress","tic-tac-toe"]            
+    data_set=["congress","tic-tac-toe"]            
 # data_set=["congress"]  
 Dict_4_Metrics={}
 for i in range(len(data_set)):
