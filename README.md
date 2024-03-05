@@ -5,15 +5,16 @@
 
 Explanation of the contents of each folder in the repository.
 
-My_package/
-|   ├── Data_loading.py         # Contains functions for loading data
-|   ├── Flow_matching_class.py  # Contains classes and functions for flow matching
-|   ├── Metrics_Functions.py    # Contains functions for calculating metrics
-|   ├── Sampling_Functions.py   # Contains functions for sampling data
-|   ├── Scaling_and_Clipping.py # Contains functions for scaling and clipping data
-|   ├── Solver_Functions.py     # Contains functions for solving problems
-|   ├── Training_Functions.py   # Contains functions for training models
-|   └── __init__.py             # Initialization file
+|     My_package      | Description                                  |
+|--------------------------|----------------------------------------------|
+| Data_loading.py          | Contains functions for loading data          |
+| Flow_matching_class.py   | Contains classes and functions for flow matching |
+| Metrics_Functions.py     | Contains functions for calculating metrics   |
+| Sampling_Functions.py    | Contains functions for sampling data         |
+| Scaling_and_Clipping.py  | Contains functions for scaling and clipping data |
+| Solver_Functions.py      | Contains functions for solving problems      |
+| Training_Functions.py    | Contains functions for training models       |
+| __init__.py              | Initialization file                          |
 
 - **.gitignore**: Gitignore file.
 - **README.md**: This file.
