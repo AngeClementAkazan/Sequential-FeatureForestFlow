@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import ot as pot
 import sklearn.metrics
+import random
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LinearRegression, LogisticRegression
@@ -15,8 +16,8 @@ import statsmodels.api as sm
 from My_package.Scaling_and_Clipping import Data_processing_functions
 from My_package.Sampling_Functions import sampling
 
-
-
+# random.seed(123) 
+np.random.seed(42)
 import copy
 
 from warnings import simplefilter
@@ -24,7 +25,7 @@ from sklearn.exceptions import ConvergenceWarning
 
 
 def test_on_multiple_models(X_train, y_train, X_test, y_test,cat_indexes,problem_type=None,   nexp=3):
-
+    
     simplefilter("ignore", category=ConvergenceWarning)
     f1_score_lin = 0.0
     f1_score_linboost = 0.0
@@ -200,8 +201,8 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
         N,K_dpl,which_solver,method: are the number of noise levels, the number of duplication, a string that provide the name of the solver we want the options are (Euler: for euler solver, Rg4: for: Runge Kutta 4th order, or Any_string: for both).
         mask_cat: is the list that shows wether or not the feature of your data set are categorical 
         Use_OneHotEnc: Determine whether or not we will use one hot encoding (takes argument True or False)
-        """
-      
+    """
+    # dt_name=dt_name.split("__")[0]
     OTLIM = 5000
     if forest_flow==None:
         method="VSFF"
@@ -239,36 +240,42 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
         mask_cat=dt_loader[-1] #This is the mask list that represent all the column that are categorical and those that are not
     
     cat_indexes=[i for i in range(len(mask_cat)) if mask_cat[i]]
-    if dt_loader[0].shape[1]==1:
+    obs_to_remove = np.isnan(dt_loader[0]).all(axis=1)
+    dta = dt_loader[0][~obs_to_remove]
+    if dta.shape[1]==1:
         X=y=dt_loader[0][:,0]
        
-
     else:
-        X,y=dt_loader[0][:,:-1],dt_loader[0][:,-1]
+        X,y=dta[:,:-1],dta[:,-1]
     b,c=dt_loader[0].shape
+   
+
     for n in range(nexp):
             Xy_train, Xy_test,X_train, X_test, y_train, y_test=define_data_class_or_regr(X,y,n)
-       
             start = time.time()      
             if forest_flow== None:
                 Xy_fake=np.array([diffusion_model(dt_loader,N,K_dpl,model_type,Use_OneHotEnc,cat_sampler_type,which_solver).sample() for k in range(ngen)])
-             
             else:
                 Xy_fake= np.array([diffusion_model(dt_loader,N,K_dpl) for k in range(ngen)])
             end = time.time()
             time_taken[method] += (end - start) / nexp
             for gen_i in range(ngen):
-                Xy_fake_i = Xy_fake[gen_i]
-                Xy_fake_it = Xy_fake[gen_i][:Xy_train.shape[0]]
-                Xy_train_scaled, Xy_fake_scaled,_,_,_,_= Data_processing_functions.minmax_scale_dummy(Xy_train, Xy_fake_it, mask_cat,divide_by=2)
-                _, Xy_test_scaled, _,_,_,_= Data_processing_functions.minmax_scale_dummy(Xy_train, Xy_test,  mask_cat,divide_by=2)
-     
+
+                Xy_fake_i=Xy_fake[gen_i]
+                # print(Xy_fake_i.shape)
+                Xy_fake_i_train = Xy_fake[gen_i][:Xy_train.shape[0]]
+                Xy_fake_i_test = Xy_fake[gen_i][Xy_train.shape[0]:]
+                Xy_train_scaled, Xy_fake_scaled,_,_,_,_= Data_processing_functions.minmax_scale_dummy(Xy_train, Xy_fake_i, mask_cat)
+                _, Xy_test_scaled, _,_,_,_= Data_processing_functions.minmax_scale_dummy(Xy_train, Xy_test,  mask_cat)
+#                 print("Xy_train.shape,Xy_fake_scaled.shape,Xy_test_scaled.shape:",(Xy_train_scaled.shape,Xy_fake_scaled.shape,Xy_test_scaled.shape))
+
                 # Wasserstein-2 based on L1 cost (after scaling)
-                if Xy_train.shape[0]<OTLIM:
+                if Xy_train.shape[0] < OTLIM:
                     score_W1_train[method] += pot.emd2(pot.unif(Xy_train_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_train_scaled, Xy_fake_scaled, metric='cityblock')) / (nexp*ngen)
                     score_W1_test[method] += pot.emd2(pot.unif(Xy_test_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_test_scaled, Xy_fake_scaled, metric='cityblock')) / (nexp*ngen)
-                        
-                
+
+            
+              
                 if dt_loader[0].shape[1]==1:
                     X_fake,y_fake = Xy_fake_i[:,0].reshape(-1,1),Xy_fake_i[:,0]
                 else:

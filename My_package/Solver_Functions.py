@@ -1,7 +1,7 @@
 " These functions are the solvers used for the sampling of our flow matching models"
 " This script describe the sampling functions we have used for our model implementation"
 import numpy as np
-
+np.random.seed(42)
 class solvers: 
     def __init__(self,dt_loader,tr_container,cat_sampler_type,mask_cat,model_type,N):
         self.dt_loader=dt_loader 
@@ -16,7 +16,7 @@ class solvers:
             N: is the number of noise level we are dealing with
             cat_sampler_type: determine whether we use the Xgboost model prediction directly for sampling(in that case the argument take the value "model_prediction_based") or we use the output probability of our Xgboost and then use a multinoimial sampler(and the argument take "proba_based")
        """
-       
+      
     def my_model_cont(self,tr_container,dt_loader,t,k,count,N,x_k, x_prev):
         if x_prev is None:                
             x = x_k    #If no previous variable (x_prev==None), x is the noisy input data used to generate the first variable of the data
@@ -27,7 +27,7 @@ class solvers:
         i = int(round(t*(self.N-1)))
         out[:, k] = self.tr_container[0][count][i].predict(x)[:b]
         return out
- 
+
     def my_model_cat(self,tr_container,dt_loader,k,cat_count, x_prev):
         b,c=self.dt_loader.shape
         out = np.zeros((b,c))
@@ -42,7 +42,7 @@ class solvers:
                 x_fake = np.zeros(b)
                 y_uniques,y_count=np.unique(self.dt_loader[:,k],return_counts=True)
                 for j in range(b):
-                    x_fake[j] = y_uniques[np.argmax(np.random.multinomial(1, x_pred[j], size=1), axis=1)] # sample according to probability
+                   x_fake[j] = y_uniques[np.argmax(np.random.multinomial(1, x_pred[j], size=1), axis=1)] # sample according to probability
                 out[:, k] =x_fake     
             else:
                 raise Exception("Choose the right sampling mode")                
@@ -59,15 +59,19 @@ class solvers:
         if self.model_type== "cont&cat":
             for k in range(c):
                 if self.mask_cat[k]:
+                    # print(f"Mask is {self.mask_cat[k]} and the variable is {k}")
                     x_k = self.my_model_cat(self.tr_container,self.dt_loader,k,cat_count, x_prev)[:,k].reshape(-1,1)
                     cat_count+=1
+                    # print(f"The value of  the categorical variable is {x_k[:10]}")
                 else:
                     t=0
+                    # print(f"Mask is {self.mask_cat[k]} and the variable is {k}")
                     x_k=np.random.normal(size=(b,1))
                     for i in range(self.N-1):
                         x_k = x_k + h*self.my_model_cont(self.tr_container,self.dt_loader,t,k,cont_count,self.N,x_k, x_prev)[:,k].reshape(-1,1)                     #[:,k] because we want to return the k th column predicted by the model
                         t = t + h
                     cont_count+=1
+                    # print(f"The value of  the continuous variable is {x_k[:10]}")
                 if x_prev is None:
                     x_prev = x_k     
                 else:
@@ -86,6 +90,7 @@ class solvers:
                 else:
                     x_prev = np.concatenate((x_prev,x_k), axis=1)
                 A+=(x_k,)
+                # print(f"The value of  the  variable {k} is {x_k[:10]}")
         else:
             raise Exception("Choose the model type as: {cont&cat: for mixed regressor and classifier model}, cont_only: for regressor only}, This has an impact on the Solver_Functions module")
         A=np.concatenate(A,axis=1) 

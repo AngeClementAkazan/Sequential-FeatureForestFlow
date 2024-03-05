@@ -8,7 +8,7 @@ from My_package.Sampling_Functions import sampling
 from My_package.Metrics import test_on_multiple_models, Metrics,compute_coverage
 
  
-
+data_set=["congress","tic-tac-toe"]
 def create_csv(data_set_name,dic):
     dta=dic[list(dic.keys())[0]][0]
     Metric_dtfr=pd.DataFrame(columns=dta.columns)
@@ -41,7 +41,7 @@ class Categorical_surgeon:
                                          N,K_dpl,Which_solver,model_type,problem_type,forest_flow=False,mask_cat=None)
         Metric_dt=create_csv(data_set_name,Metrics4_data)
         return Metrics4_data
-    data_set=["congress","tic-tac-toe"]            
+               
 # data_set=["congress"]  
 Dict_4_Metrics={}
 for i in range(len(data_set)):

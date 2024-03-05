@@ -5,7 +5,7 @@ from My_package.Flow_matching_class import CFM
 from My_package.Solver_Functions import solvers
 from My_package.Scaling_and_Clipping import Data_processing_functions
 
-
+np.random.seed(42)
 "Flow matching class"
 FM_instance = CFM(sigma=0.0)                   
 class sampling:
@@ -28,16 +28,18 @@ class sampling:
             Use_OneHotEnc: Determine whether or not we will use one hot encoding (takes argument True or False)
        """
 
-    def Final_training(self,data,N,K_dpl,mask_cat):
+    def Final_training(self,data, N, K_dpl,mask_cat):
             cat_ind_b4_1hotEnc=[id for id in range(len(mask_cat)) if mask_cat[id]] 
             X_transformed=data
             X_names_before, X_names_after,scaler, mask_cat_4_1hotEnc= None,None,None,mask_cat 
             if len(cat_ind_b4_1hotEnc) > 0 and self.Use_OneHotEnc== True:
                 X_transformed, X_names_before, X_names_after,mask_cat_4_1hotEnc = Data_processing_functions.dummify(data,mask_cat)
-
+                
+            # print("Xtransformed.shape:",X_transformed.shape, self.K_dpl)
             if len(cat_ind_b4_1hotEnc)<data.shape[1]:
                 scaler = MinMaxScaler(feature_range=(-1, 1))
-                X_transformed[:,~np.array(mask_cat_4_1hotEnc)]=scaler.fit_transform(X_transformed[:,~np.array(mask_cat_4_1hotEnc)])                                   
+                X_transformed[:,~np.array(mask_cat_4_1hotEnc)]=scaler.fit_transform(X_transformed[:,~np.array(mask_cat_4_1hotEnc)])
+
             data_4_training=np.tile(X_transformed, (self.K_dpl, 1))
             Train_c=Training(FM_instance,data_4_training,mask_cat_4_1hotEnc,self.model_type,self.K_dpl,self.N)
             train_c=Train_c.training()     #Container that hold the training Xgboost model
@@ -68,5 +70,5 @@ class sampling:
             X_min = np.nanmin(dt, axis=0, keepdims=1)
             X_max = np.nanmax(dt, axis=0, keepdims=1)
             # clip to min/max values
-            solution=Data_processing_functions.clipping(X_min,X_max,solution,dt,msk_ct)
+            solution=Data_processing_functions.clipping(X_min,X_max,solution,dta,msk_ct)
             return solution

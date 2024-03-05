@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import copy
 from sklearn.preprocessing import MinMaxScaler
-
+np.random.seed(42)
 
 " This script contains data processing functions"
 class Data_processing_functions:
@@ -37,23 +37,24 @@ class Data_processing_functions:
     def Dummify(X, cat_indexes, divide_by=0, drop_first=False):
         df = pd.DataFrame(X, columns = [str(i) for i in range(X.shape[1])]) # to Pandas
         df_names_before = df.columns
-        for i in cat_indexes:
-            df = pd.get_dummies(df, columns=[str(i)], prefix=str(i), dtype='float', drop_first=drop_first)
-            if divide_by > 0: # needed for L1 distance to equal 1 when categories are different
-                filter_col = [col for col in df if col.startswith(str(i) + '_')]
-                df[filter_col] = df[filter_col] / divide_by
+        for i in range(len(cat_indexes)):
+            if cat_indexes[i]==True:
+                df = pd.get_dummies(df, columns=[str(i)], prefix=str(i), dtype='float', drop_first=drop_first)
+                if divide_by > 0: # needed for L1 distance to equal 1 when categories are different
+                    filter_col = [col for col in df if col.startswith(str(i) + '_')]
+                    df[filter_col] = df[filter_col] / divide_by
         df_names_after = df.columns
         df = df.to_numpy()
         cat_index=Data_processing_functions.dummify(X,cat_indexes,  drop_first=True)[-1]
         return df, df_names_before, df_names_after,cat_index
 
     @staticmethod
-    def minmax_scale_dummy(X_train, X_test, msk_ct,divide_by, mask=None):
+    def minmax_scale_dummy(X_train, X_test, msk_ct,divide_by=2, mask=None):
         X_train_ = copy.deepcopy(X_train)
         X_test_ = copy.deepcopy(X_test)
         scaler = MinMaxScaler()
-        cat_ind_only=[i for i in range(len(msk_ct)) if msk_ct[i]]
-        if len(cat_ind_only)!= X_train_.shape[1]: # if some variables are continuous, we  scale-transform
+        num_cat=msk_ct.count(True)
+        if num_cat!= X_train_.shape[1]: # if some variables are continuous, we  scale-transform
             not_cat_indexes=~np.array(msk_ct)  #Full 1D array indicating non categorical as True and categorical as False
             scaler.fit(X_train_[:, not_cat_indexes])
             X_train_[:, not_cat_indexes] = scaler.transform(X_train_[:, not_cat_indexes])
@@ -61,12 +62,27 @@ class Data_processing_functions:
         # One-hot the categorical variables 
         df_names_before, df_names_after = None, None
         n = X_train.shape[0]
-        if len(cat_ind_only) > 0:                                
-            X_train_test, df_names_before, df_names_after,mask= Data_processing_functions.Dummify(np.concatenate((X_train_, X_test_), axis=0),cat_ind_only,divide_by, drop_first=False)
+        if num_cat > 0:                                
+            X_train_test, df_names_before, df_names_after,mask= Data_processing_functions.Dummify(np.concatenate((X_train_, X_test_), axis=0),msk_ct,divide_by, drop_first=False)
         X_train_t = X_train_test[0:n,:]
         X_test_t= X_train_test[n:,:]
         return X_train_t, X_test_t, scaler,mask, df_names_before, df_names_after
+    # @staticmethod
+    # def minmax_scale_dummy(X, msk_ct,divide_by, mask=None):
+    #     X_ = copy.deepcopy(X)
+    #     scaler = MinMaxScaler(feature_range=(-1, 1))
+    #     num_cat=msk_ct.count(True)
+    #     if num_cat!= X_.shape[1]: # if some variables are continuous, we  scale-transform
+    #         not_cat_indexes=~np.array(msk_ct)  #Full 1D array indicating non categorical as True and categorical as False
+    #         scaler.fit(X_[:, not_cat_indexes])
+    #         X_[:, not_cat_indexes] = scaler.transform(X_[:, not_cat_indexes])
+    #     # One-hot the categorical variables 
+    #     df_names_before, df_names_after = None, None
+    #     # n = X_.shape[0]
+    #     if num_cat > 0:                                
+    #         X_dummify, df_names_before, df_names_after,mask= Data_processing_functions.Dummify(X_,msk_ct,divide_by, drop_first=False)
 
+    #     return X_dummify, scaler,mask, df_names_before, df_names_after
     "Rounding for the categorical variables which are dummy-coded and then remove dummy-coding"
     @staticmethod
     def clean_onehot_data(X,X_names_before,X_names_after,ct_indexes): 
@@ -76,7 +92,8 @@ class Data_processing_functions:
             X_names_after = copy.deepcopy(X_names_after.to_numpy())
             prefixes = [x.split('_')[0] for x in X_names_after if '_' in x] # for all categorical variables, we have prefix ex: ['gender', 'gender']
 
-            unique_prefixes = sorted(set(prefixes ), key=lambda x: int(x))# uniques prefixes
+            unique_prefixes = np.unique(prefixes)
+            # sorted(set(prefixes ), key=lambda x: int(x))# uniques prefixes
             
             for i in range(len(unique_prefixes)):
                 cat_vars_indexes = [unique_prefixes[i] + '_' in my_name for my_name in X_names_after]
@@ -94,12 +111,10 @@ class Data_processing_functions:
                 X_names_after[cat_vars_indexes[0]] = unique_prefixes[i] # gender_a -> gender
             df = pd.DataFrame(X, columns = X_names_after) # to Pandas
             
-            df = df[X_names_before] # remove all gender_b, gender_c and put everything in the right order
+            df = df[X_names_before] # remove all gender_b, gender_c and put everything in the right order and not msk_cat[o]
             X = df.to_numpy()
         return X
     
-#     @staticmethod       
-
    
     @staticmethod 
     def clipping(min,max,sol,dt_loader,msk_cat):

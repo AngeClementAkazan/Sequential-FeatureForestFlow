@@ -8,7 +8,7 @@ from numpy import loadtxt
 from xgboost import XGBClassifier
 from functools import partial
 from sklearn.preprocessing import MinMaxScaler
-
+np.random.seed(42)
 
 class Training():
     def __init__(self,model,dt_loader,mask_cat,model_type,K_dpl,n_t,
@@ -77,7 +77,7 @@ random_state=42):
             reg_lambda=self.reg_lambda,
             reg_alpha=self.reg_alpha,
             subsample=self.subsample,n_jobs=-1, num_parallel_tree=1,
-            tree_method=self.tree_method, random_state= self.random_state, device='cpu') 
+            tree_method=self.tree_method,seed=666,random_state= self.random_state, device='cpu') 
              # For XGBoost 1.3.0 and above
             # eval_metric='mlogloss' if len(np.unique(y_train)) > 2 else 'logloss',
         y_no_miss = ~np.isnan(y_train.ravel())
@@ -154,7 +154,6 @@ random_state=42):
                         current_i_cont += 1
         else:
             raise Exception ( " Choose the right value for the  model_type argument")
-        
         return regr_,results_cat
        
 
