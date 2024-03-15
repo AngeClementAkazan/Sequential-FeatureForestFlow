@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import copy
 from sklearn.preprocessing import MinMaxScaler
-np.random.seed(42)
+
 
 " This script contains data processing functions"
 class Data_processing_functions:
@@ -67,22 +67,7 @@ class Data_processing_functions:
         X_train_t = X_train_test[0:n,:]
         X_test_t= X_train_test[n:,:]
         return X_train_t, X_test_t, scaler,mask, df_names_before, df_names_after
-    # @staticmethod
-    # def minmax_scale_dummy(X, msk_ct,divide_by, mask=None):
-    #     X_ = copy.deepcopy(X)
-    #     scaler = MinMaxScaler(feature_range=(-1, 1))
-    #     num_cat=msk_ct.count(True)
-    #     if num_cat!= X_.shape[1]: # if some variables are continuous, we  scale-transform
-    #         not_cat_indexes=~np.array(msk_ct)  #Full 1D array indicating non categorical as True and categorical as False
-    #         scaler.fit(X_[:, not_cat_indexes])
-    #         X_[:, not_cat_indexes] = scaler.transform(X_[:, not_cat_indexes])
-    #     # One-hot the categorical variables 
-    #     df_names_before, df_names_after = None, None
-    #     # n = X_.shape[0]
-    #     if num_cat > 0:                                
-    #         X_dummify, df_names_before, df_names_after,mask= Data_processing_functions.Dummify(X_,msk_ct,divide_by, drop_first=False)
 
-    #     return X_dummify, scaler,mask, df_names_before, df_names_after
     "Rounding for the categorical variables which are dummy-coded and then remove dummy-coding"
     @staticmethod
     def clean_onehot_data(X,X_names_before,X_names_after,ct_indexes): 

@@ -1,13 +1,13 @@
 import pandas as pd
-from My_package.Training_Functions import Training
-from My_package.Data_loading import data_loader
-from My_package.Flow_matching_class import CFM
-from My_package.Solver_Functions import solvers
-from My_package.Scaling_and_Clipping import Data_processing_functions
+from My_package.utils.Training_Functions import Training
+from My_package.utils.Data_loading import data_loader
+from My_package.utils.Flow_matching_class import CFM
+from My_package.utils.Solver_Functions import solvers
+from My_package.utils.Scaling_and_Clipping import Data_processing_functions
 from My_package.Sampling_Functions import sampling
-from My_package.Metrics import test_on_multiple_models, Metrics,compute_coverage
+from My_package.utils.Metrics import test_on_multiple_models, Metrics,compute_coverage
 
- 
+
 data_set=["congress","tic-tac-toe"]
 def create_csv(data_set_name,dic):
     dta=dic[list(dic.keys())[0]][0]

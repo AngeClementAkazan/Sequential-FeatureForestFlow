@@ -1,7 +1,7 @@
 " These functions are the solvers used for the sampling of our flow matching models"
 " This script describe the sampling functions we have used for our model implementation"
 import numpy as np
-np.random.seed(42)
+
 class solvers: 
     def __init__(self,dt_loader,tr_container,cat_sampler_type,mask_cat,model_type,N):
         self.dt_loader=dt_loader 

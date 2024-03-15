@@ -8,10 +8,10 @@ from numpy import loadtxt
 from xgboost import XGBClassifier
 from functools import partial
 from sklearn.preprocessing import MinMaxScaler
-np.random.seed(42)
+
 
 class Training():
-    def __init__(self,model,dt_loader,mask_cat,model_type,K_dpl,n_t,
+    def __init__(self,model,dt_loader,mask_cat,model_type,K_dpl,n_t,arg1,arg2,
 n_estimators=100,
 tree_method='hist',
 reg_lambda=0.0,
@@ -25,7 +25,15 @@ gamma=0,
 min_child_weight=1,  
 scale_pos_weight=1,  
 random_state=42):
-
+         
+        """ dt_loader: is the data to be inputted (duplicated data)
+                K_dpl: is the number of time we duplicate our data
+                model: Conditional Flow Matching Model
+                mask_cat: is the mask for categorical data (list containing True for categorical and False for Continuous
+                n_t: is the number of noise level we are dealing with 
+                model_type: specifies whether we have a mixed model (regressor and classification) or regressor only 
+                arg1 and arg2 are respectively, the remaining hyperparameter for tunning the regressor and the classifier ( We didi not consider all the argument for our Xgboost regressor and classifier, ythe user will define them personnally if needed)
+            """
         self.model=model
         self.dt_loader= dt_loader
         self.model_type=model_type
@@ -41,6 +49,9 @@ random_state=42):
         self.reg_alpha=reg_alpha
         self.subsample=subsample 
         self.random_state=random_state
+        self.arg1=arg1
+        self.arg2=arg2
+
     
     def forward_process(self,dt_loader,model,n_t):  
         self.model=model
@@ -60,10 +71,10 @@ random_state=42):
         return X_train, y_train,self.dt_loader
 
 
-    def train_cont(self,X_train, y_train):
+    def train_cont(self,X_train, y_train ):
         model = xgb.XGBRegressor(n_estimators=self.n_estimators, objective='reg:squarederror', eta=self.eta, max_depth=self.max_depth,
                                  reg_lambda=self.reg_lambda, reg_alpha=self.reg_alpha, subsample=self.subsample, 
-                                 seed=666, tree_method=self.tree_method, device='cpu')
+                                 seed=666, tree_method=self.tree_method, device='cpu', **self.arg1)
         y_no_miss = ~np.isnan(y_train.ravel())
         model.fit(X_train[y_no_miss,:], y_train[y_no_miss])
         return model
@@ -77,7 +88,7 @@ random_state=42):
             reg_lambda=self.reg_lambda,
             reg_alpha=self.reg_alpha,
             subsample=self.subsample,n_jobs=-1, num_parallel_tree=1,
-            tree_method=self.tree_method,seed=666,random_state= self.random_state, device='cpu') 
+            tree_method=self.tree_method,seed=666,random_state= self.random_state, device='cpu',**self.arg2) 
              # For XGBoost 1.3.0 and above
             # eval_metric='mlogloss' if len(np.unique(y_train)) > 2 else 'logloss',
         y_no_miss = ~np.isnan(y_train.ravel())

@@ -13,16 +13,11 @@ from sklearn.metrics import f1_score, r2_score
 import xgboost as xgb
 from sklearn.preprocessing import LabelEncoder
 import statsmodels.api as sm
-from My_package.Scaling_and_Clipping import Data_processing_functions
+from Scaling_and_Clipping import Data_processing_functions
 from My_package.Sampling_Functions import sampling
-
-# random.seed(123) 
-np.random.seed(42)
 import copy
-
 from warnings import simplefilter
 from sklearn.exceptions import ConvergenceWarning
-
 
 def test_on_multiple_models(X_train, y_train, X_test, y_test,cat_indexes,problem_type=None,   nexp=3):
     
@@ -192,7 +187,7 @@ def define_data_class_or_regr(X,y,n):
     return Xy_train, Xy_test,X_train, X_test, y_train, y_test
 
 def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
-            N,K_dpl,which_solver,model_type,Use_OneHotEnc,cat_sampler_type,problem_type=None,method=None,forest_flow=None,mask_cat=None):
+            N,K_dpl,which_solver,model_type,Use_OneHotEnc,cat_sampler_type,arg1,arg2,problem_type=None,method=None,forest_flow=None,mask_cat=None):
     """ ngen and nexp: Number of generation and experiment
         diffusion_model: the diffusion function you have to input ( the parameters should be dt_loader,i,N and K_dpl)
         dt_loader and dt_name: are respectively the data  and the name of the data you imputted
@@ -254,7 +249,7 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
             Xy_train, Xy_test,X_train, X_test, y_train, y_test=define_data_class_or_regr(X,y,n)
             start = time.time()      
             if forest_flow== None:
-                Xy_fake=np.array([diffusion_model(dt_loader,N,K_dpl,model_type,Use_OneHotEnc,cat_sampler_type,which_solver).sample() for k in range(ngen)])
+                Xy_fake=np.array([diffusion_model(dt_loader,mask_cat,N,K_dpl,model_type,Use_OneHotEnc,cat_sampler_type,which_solver,arg1,arg2).sample() for k in range(ngen)])
             else:
                 Xy_fake= np.array([diffusion_model(dt_loader,N,K_dpl) for k in range(ngen)])
             end = time.time()
@@ -313,7 +308,7 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
 
 
     ls=["dataset", "method_str", f"score_W1_train[{method}]" ,f" score_W1_test[{method}]" , f"R2[{method}]['real']['mean']" , f"R2[{method}]['fake']['mean']" , f"R2[{method}]['both']['mean']" , f"f1[{method}]['real']['mean']" , f"f1[{method}]['fake']['mean']" , f"f1[{method}]['both']['mean']" , f"coverage[{method}]" ,f"coverage_test[{method}]" ,f"time_taken[{method}] "]
-    #     print(csv_str)
+    #print(csv_str)
     
     result = []
     for key in ['lin', 'linboost', 'tree', 'treeboost']:
