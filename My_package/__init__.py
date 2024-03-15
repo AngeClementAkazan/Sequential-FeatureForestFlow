@@ -1,1 +1,1 @@
-from Sampling_Functions import sampling
+from My_package.Sampling_Functions import sampling
