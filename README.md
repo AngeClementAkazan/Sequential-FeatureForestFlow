@@ -2,6 +2,22 @@
 
 
 ## Folder Structure
+project_root/
+│
+├── src/
+│   ├── main.py
+│   ├── utils/
+│   │   ├── helper.py
+│   │   └── constants.py
+│   └── models/
+│       ├── model1.py
+│       └── model2.py
+│
+├── data/
+│   ├── dataset1.csv
+│   └── dataset2.csv
+│
+└── README.md
 
 Explanation of the contents of each folder in the repository.
 
