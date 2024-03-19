@@ -18,7 +18,7 @@ from sklearn.preprocessing import LabelEncoder
 from warnings import simplefilter
 from sklearn.exceptions import ConvergenceWarning
 
-from Scaling_and_Clipping import Data_processing_functions
+from .Scaling_and_Clipping import Data_processing_functions
 from My_package.Sampling_Functions import sampling
 
 def test_on_multiple_models(X_train, y_train, X_test, y_test,cat_indexes,problem_type=None,   nexp=3):
@@ -251,7 +251,7 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
             start = time.time()   
             # Determining  a tensor of ngen generated samples   
             if forest_flow== None:
-                Xy_fake=np.array([diffusion_model(dt_loader,mask_cat,N,K_dpl,model_type,Use_OneHotEnc,cat_sampler_type,which_solver,arg1,arg2).sample() for k in range(ngen)])
+                Xy_fake=np.array([diffusion_model(dt_loader,N,K_dpl,model_type,Use_OneHotEnc,cat_sampler_type,which_solver,arg1,arg2).sample() for k in range(ngen)])
             else:
                 Xy_fake= np.array([diffusion_model(dt_loader,N,K_dpl) for k in range(ngen)])
             end = time.time()

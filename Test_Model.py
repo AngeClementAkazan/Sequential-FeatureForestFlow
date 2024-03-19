@@ -10,7 +10,7 @@ from My_package.utils.Scaling_and_Clipping import Data_processing_functions
 from My_package.Sampling_Functions import sampling
 from My_package.utils.Metrics import test_on_multiple_models, Metrics,compute_coverage
 
-np.random.seed(777)
+np.random.seed(142)
 FM_instance = CFM(sigma=0.0) 
 def create_csv(data_set_name,dic):
     dta=dic[list(dic.keys())[0]][0]
@@ -37,7 +37,7 @@ class TestTrainingClass(unittest.TestCase):
         Metrics4_data={}
         ngen,nexp,cat_sampler_type,model_type=2,2,"proba_based","cont&cat"
         arg1,arg2={},{}
-        N,K_dpl,Which_solver,problem_type,Use_OneHotEnc=5,1,"Euler", ["Class","Class","Class","Class","Class","Class","Class"],False
+        N,K_dpl,Which_solver,problem_type,Use_OneHotEnc=50,100,"Euler", ["Class","Class","Class","Class","Class","Class","Class"],False
         for i in range(len(data_set_name)):
                 if data_set_name[i] in ["iris"]:
                     dt=data_loading(data_set_name[i]).data_loader()
