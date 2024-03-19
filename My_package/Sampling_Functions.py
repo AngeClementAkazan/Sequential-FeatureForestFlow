@@ -9,9 +9,8 @@ from My_package.utils.Scaling_and_Clipping import Data_processing_functions
 FM_instance = CFM(sigma=0.0)                   
 class sampling:
                  
-    def __init__(self,dt_loader,mask_cat,N,K_dpl,model_type,Use_OneHotEnc,cat_sampler_type,which_solver=None,arg1={},arg2={}):
-        self.dt_loader=dt_loader 
-        self.mask_cat=mask_cat
+    def __init__(self,dt_loader,N,K_dpl,model_type,Use_OneHotEnc,cat_sampler_type,which_solver=None,arg1={},arg2={}):
+        self.dt_loader=dt_loader
         self.N=N
         self.K_dpl=K_dpl
         self.which_solver=which_solver 
@@ -21,7 +20,7 @@ class sampling:
         self.arg1=arg1
         self.arg2=arg2
 
-        """ dt_loader: is the data to be inputted
+        """ dt_loader: is a tuple containing the data to be inputted and its corresponding categorical mask
             K_dpl: is the number of time we duplicate our data
             mask_cat: is the mask for categorical data (list containing True for categorical and False for Continuous
             N: is the number of noise level we are dealing with 
@@ -33,12 +32,12 @@ class sampling:
        """
     # kwarg1=list(kwargs.items)
    
-    def Final_training(self,data, N, K_dpl):
-            cat_ind_b4_1hotEnc=[id for id in range(len(self.mask_cat)) if self.mask_cat[id]] 
+    def Final_training(self,data, N, K_dpl,mask_cat):
+            cat_ind_b4_1hotEnc=[id for id in range(len(mask_cat)) if mask_cat[id]] 
             X_transformed=data
-            X_names_before, X_names_after,scaler, mask_cat_4_1hotEnc= None,None,None,self.mask_cat
+            X_names_before, X_names_after,scaler, mask_cat_4_1hotEnc= None,None,None,mask_cat
             if len(cat_ind_b4_1hotEnc) > 0 and self.Use_OneHotEnc== True:
-                X_transformed, X_names_before, X_names_after,mask_cat_4_1hotEnc = Data_processing_functions.dummify(data,self.mask_cat)
+                X_transformed, X_names_before, X_names_after,mask_cat_4_1hotEnc = Data_processing_functions.dummify(data,mask_cat)
                 
             # print("Xtransformed.shape:",X_transformed.shape, self.K_dpl)
             if len(cat_ind_b4_1hotEnc)<data.shape[1]:
@@ -55,7 +54,7 @@ class sampling:
              # Sanity check, must remove observations with only missing data
             obs_to_remove = np.isnan(dta).all(axis=1)
             dta = dta[~obs_to_remove]
-            train_c,dt_Aftr_or_Not_1hE,data_4_training,scaler, cat_ind_b4_1hotEnc,mask_cat_4_1hotEnc,X_names_before, X_names_after=self.Final_training(dta,self.N,self.K_dpl)  #Training container, dummified and transformed data plus the new mask 
+            train_c,dt_Aftr_or_Not_1hE,data_4_training,scaler, cat_ind_b4_1hotEnc,mask_cat_4_1hotEnc,X_names_before, X_names_after=self.Final_training(dta,self.N,self.K_dpl,msk_ct)  #Training container, dummified and transformed data plus the new mask 
             x_k=x_fake= None
             ### ODE solvers ###
             Solver=solvers(dt_Aftr_or_Not_1hE,train_c,self.cat_sampler_type,mask_cat_4_1hotEnc,self.model_type,self.N)

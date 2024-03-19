@@ -94,7 +94,14 @@ class data_loading:
         mask=[True]*cat_var_nb+[False]*cont_var_nb+[True]
         return Xy,y,data_,mask
 
-
+def XOR_of_signs(ls):
+    result = 0
+    for num in ls:
+        # Get the sign of the number (1 for positive, 0 for negative)
+        sign = 1 if num >= 0 else 0
+        # Perform XOR operation with the result
+        result ^= sign
+    return result
 
 def fetch_tictactoe():
     dataset_dir = '/Users/ange-clementakazan/Documents/DIFFUSION_MODELS/Data_set/tictactoe'
@@ -171,21 +178,3 @@ def fetch_ionosphere():
         Xy['target'] =  pd.factorize(df.values[:, -1])[0] # str to numeric
     return Xy
 
-def XOR_of_signs(ls):
-    result = 0
-    for num in ls:
-        # Get the sign of the number (1 for positive, 0 for negative)
-        sign = 1 if num >= 0 else 0
-        # Perform XOR operation with the result
-        result ^= sign
-    return result
-
-
-# num_samples = 2000  # Total number of samples
-# num_features = 15   # Total number of features
-# cont_var_n= 15
-# perct_cat=0.8
-
-# # Mean vector
-# mean =int(num_features*perct_cat)
-# print(mean)

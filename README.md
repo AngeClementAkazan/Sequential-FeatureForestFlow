@@ -18,8 +18,25 @@ which_solver: takes two values: {Euler: for Euler solver or RG4: for Runge Kutta
 * cat_sampler_type: determine whether we use the Xgboost model prediction directly for sampling(in that case the argument take the value "model_prediction-based") or we use the output probability of our Xgboost and then use a multinoimial sampler(and the argument take "proba-based")
 * Use_OneHotEnc: Determine whether or not we will use one hot encoding (takes argument True or False).
 * arg1 and arg2 are respectively, the remaining hyperparameter for tunning the regressor and the classifier ( We did not consider all the argument for our Xgboost regressor and classifier, ythe user will define them personnally if needed)
-      `
+      
+### Cloning the Repository
 
+To clone this repository to your local machine, use the following command:
+
+*  git clone https://github.com/AngeClementAkazan/Forest-FLow-Based-Variable-Sampling.git 
+* cd Forest-FLow-Based-Variable-Sampling 
+
+### Very mportant point
+* Your dataset needs to be in numpy format. If you're using a pandas dataset, you can convert it to numpy format by using the command `dataset_numpy = dataset.to_numpy()`. Additionally, it's acceptable for the dataset to include missing values, the code contain a data processing part.
+* The method uses a XGboost model, which demand that the class of each of the categorical variables of your  must have classes from {0,..., N}. 
+You can either set the  variable `Use_OneHotEnc` to `True` or before you input your model you can use an appropriate encoding method to respect this constraint.
+## Some references
+List of implemented papers:
+
+* Generating and Imputing Tabular Data via Diffusion and Flow-based
+Gradient-Boosted Trees by Alexia Joliecoeur et. al [Github](https://github.com/atong01/conditional-flow-matching)
+* Improving and Generalizing Flow-Based Generative Models
+with Minibatch Optimal Transport by Alexander Tong et. al [Github](https://github.com/atong01/conditional-flow-matching)
 ## Folder Structure
 <pre>
 │

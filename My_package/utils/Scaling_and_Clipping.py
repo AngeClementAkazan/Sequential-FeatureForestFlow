@@ -32,9 +32,9 @@ class Data_processing_functions:
         # Combine the two conditions
         result = np.logical_and(are_integers, decimal_part_is_zero)
         return result.all()
-    
+   
     @staticmethod
-    def Dummify(X, cat_indexes, divide_by=0, drop_first=False):
+    def Dummify(X, cat_indexes, divide_by=0, drop_first=False): #To use in the metrics scripts in order to foster wasserstein computation and result comparisons
         df = pd.DataFrame(X, columns = [str(i) for i in range(X.shape[1])]) # to Pandas
         df_names_before = df.columns
         for i in range(len(cat_indexes)):

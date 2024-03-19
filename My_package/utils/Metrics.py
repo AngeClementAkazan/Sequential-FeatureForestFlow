@@ -1,23 +1,25 @@
-from sklearn.exceptions import ConvergenceWarning
+
 import time
+import xgboost as xgb
+import statsmodels.api as sm
 import numpy as np
 import pandas as pd
 import ot as pot
 import sklearn.metrics
 import random
+import copy
+
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.ensemble import AdaBoostClassifier, AdaBoostRegressor, RandomForestClassifier, RandomForestRegressor
 from sklearn.metrics import f1_score, r2_score
-import xgboost as xgb
 from sklearn.preprocessing import LabelEncoder
-import statsmodels.api as sm
-from Scaling_and_Clipping import Data_processing_functions
-from My_package.Sampling_Functions import sampling
-import copy
 from warnings import simplefilter
 from sklearn.exceptions import ConvergenceWarning
+
+from Scaling_and_Clipping import Data_processing_functions
+from My_package.Sampling_Functions import sampling
 
 def test_on_multiple_models(X_train, y_train, X_test, y_test,cat_indexes,problem_type=None,   nexp=3):
     
@@ -47,8 +49,7 @@ def test_on_multiple_models(X_train, y_train, X_test, y_test,cat_indexes,problem
         
     for j in range(nexp):
         if problem_type.capitalize()== "Class":
-#             if i=="congress":
-#                 print(np.isin(np.unique(y_test), np.unique(y_train)).all())
+
             if not np.isin(np.unique(y_test), np.unique(y_train)).all(): # not enough classes were generated, score=0
                 f1_score_lin += 0
                 f1_score_linboost += 0
@@ -247,7 +248,8 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
 
     for n in range(nexp):
             Xy_train, Xy_test,X_train, X_test, y_train, y_test=define_data_class_or_regr(X,y,n)
-            start = time.time()      
+            start = time.time()   
+            # Determining  a tensor of ngen generated samples   
             if forest_flow== None:
                 Xy_fake=np.array([diffusion_model(dt_loader,mask_cat,N,K_dpl,model_type,Use_OneHotEnc,cat_sampler_type,which_solver,arg1,arg2).sample() for k in range(ngen)])
             else:
@@ -270,7 +272,7 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
                     score_W1_test[method] += pot.emd2(pot.unif(Xy_test_scaled.shape[0]), pot.unif(Xy_fake_scaled.shape[0]), M = pot.dist(Xy_test_scaled, Xy_fake_scaled, metric='cityblock')) / (nexp*ngen)
 
             
-              
+               #
                 if dt_loader[0].shape[1]==1:
                     X_fake,y_fake = Xy_fake_i[:,0].reshape(-1,1),Xy_fake_i[:,0]
                 else:
@@ -338,4 +340,3 @@ def Metrics(ngen,nexp,diffusion_model,dt_loader,dt_name,
             csv_4_ls.append(i)
     m_dt.loc[0]=csv_4_ls
     return m_dt,Xy_fake
-#     method_index_start = 0 #  so we loop back againsample_Euler(X,y, euler_solve,runge_kutta_solve,b,c,n_t)Metric,Sample
