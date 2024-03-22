@@ -9,9 +9,12 @@ from My_package.utils.Solver_Functions import solvers
 from My_package.utils.Scaling_and_Clipping import Data_processing_functions
 from My_package.Sampling_Functions import sampling
 from My_package.utils.Metrics import test_on_multiple_models, Metrics,compute_coverage
+## This scirpt contains test functions for running the Metrics.py file
+## To run this script, you must change the value inside the functions test_method_1 or test_method_2 and use this code" python -m unittest Test_Model.TestTrainingClass.test_method_1" you can replace 1 by 2 if you need to run the second test function
 
 np.random.seed(142)
-FM_instance = CFM(sigma=0.0) 
+FM_instance = CFM(sigma=0.0)
+#Create a function that will create a csv table for  the error metrics for the data set of test_method_1
 def create_csv(data_set_name,dic):
     dta=dic[list(dic.keys())[0]][0]
     Metric_dtfr=pd.DataFrame(columns=dta.columns)
@@ -21,7 +24,7 @@ def create_csv(data_set_name,dic):
         Metric_dtfr.loc[cpt]=dt.iloc[0]
         cpt+=1
     return Metric_dtfr
-
+#Create a function that will create a csv table for  the error metrics for the data set of test_method_2
 def create_class_csv(j,perc,dic): 
     dta=dic[j][list(dic[j].keys())[0]][0]
     Metric_dtfr=pd.DataFrame(columns=dta.columns)
@@ -32,6 +35,16 @@ def create_class_csv(j,perc,dic):
         cpt+=1
     return Metric_dtfr
 class TestTrainingClass(unittest.TestCase):
+      """ dt_loader: is a tuple containing the data to be inputted and its corresponding categorical mask
+            K_dpl: is the number of time we duplicate our data
+            mask_cat: is the mask for categorical data (list containing True for categorical and False for Continuous
+            N: is the number of noise level we are dealing with 
+            which_solver: takes two values: {Euler: for Euler solver or RG4: for Runge Kutta solver}
+            model_type: specifies whether we have a mixed model (regressor and classification) or regressor only 
+            cat_sampler_type: determine whether we use the Xgboost model prediction directly for sampling(in that case the argument take the value "model_prediction-based") or we use the output probability of our Xgboost and then use a multinoimial sampler(and the argument take "proba-based")
+            Use_OneHotEnc: Determine whether or not we will use one hot encoding (takes argument True or False)
+            arg1 and arg2 are respectively, the remaining hyperparameter for tunning the regressor and the classifier ( We did not consider all the argument for our Xgboost regressor and classifier, ythe user will define them personnally if needed)
+       """
     def test_method_1(self):
         data_set_name=["iris","wine","congress","tic-tac-toe","heart_disease", "ionosphere", "breast_cancer"]
         Metrics4_data={}
@@ -69,7 +82,7 @@ if __name__ == '__main__':
     unittest.main()
     
 
-   
+
    
 # My_Package_FFVS/
 # ├── My_package/
