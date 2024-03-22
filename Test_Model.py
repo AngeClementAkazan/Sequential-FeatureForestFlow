@@ -45,6 +45,7 @@ class TestTrainingClass(unittest.TestCase):
             Use_OneHotEnc: Determine whether or not we will use one hot encoding (takes argument True or False)
             arg1 and arg2 are respectively, the remaining hyperparameter for tunning the regressor and the classifier ( We did not consider all the argument for our Xgboost regressor and classifier, ythe user will define them personnally if needed)
        """
+    # Test script for data downloaded from UCI
     def test_method_1(self):
         data_set_name=["iris","wine","congress","tic-tac-toe","heart_disease", "ionosphere", "breast_cancer"]
         Metrics4_data={}
@@ -52,14 +53,14 @@ class TestTrainingClass(unittest.TestCase):
         arg1,arg2={},{}
         N,K_dpl,Which_solver,problem_type,Use_OneHotEnc=50,100,"Euler", ["Class","Class","Class","Class","Class","Class","Class"],False
         for i in range(len(data_set_name)):
-                if data_set_name[i] in ["iris"]:
-                    dt=data_loading(data_set_name[i]).data_loader()
-                    Metrics4_data[data_set_name[i]]=Metrics(ngen,nexp,sampling,dt,data_set_name[i],
-                                        N,K_dpl,Which_solver,model_type,Use_OneHotEnc,cat_sampler_type,arg1,arg2,problem_type[i],forest_flow=None,mask_cat=None)
-                    Metrics4_data[data_set_name[i]][0].to_csv(f'/Users/ange-clementakazan/Documents/My_metrics/Metric_{model_type}_Euler_{data_set_name[i]}Use_OneHotEnc={Use_OneHotEnc}.csv',mode='w')
+                # if data_set_name[i] in ["iris"]:
+                dt=data_loading(data_set_name[i]).data_loader()
+                Metrics4_data[data_set_name[i]]=Metrics(ngen,nexp,sampling,dt,data_set_name[i],
+                                    N,K_dpl,Which_solver,model_type,Use_OneHotEnc,cat_sampler_type,arg1,arg2,problem_type[i],forest_flow=None,mask_cat=None)
+                Metrics4_data[data_set_name[i]][0].to_csv(f'/Users/ange-clementakazan/Documents/My_metrics/Metric_{model_type}_Euler_{data_set_name[i]}Use_OneHotEnc={Use_OneHotEnc}.csv',mode='w')
  
 
-
+    # Test script for simulated data
     def test_method_2(self):
         Metrics4_data={}
         ngen,nexp,cat_sampler_type,model_type,data_set_name=1,1,"model_prediction_based","cont_only", ["Maj_sum>0","Maj_vote>0","XORofAllSign"]
@@ -73,7 +74,7 @@ class TestTrainingClass(unittest.TestCase):
                             rd_dt=dt.random_data_loader()
                             Metrics4_data[j][f"{p*100}% of cat"]=Metrics(ngen,nexp,sampling,rd_dt,f"{j}__{p*100}% Dis",
                                                 N,K_dpl,Which_solver,model_type,Use_OneHotEnc,cat_sampler_type,problem_type,forest_flow=None,mask_cat=None)
-                            Metrics4_data[j][f"{p*100}% of cat"][0].to_csv(f'/Users/ange-clementakazan/Documents/My_metrics/Special_Metrics/Cat_pert:{p}_Metric_{model_type}_{Which_solver}_{data_set_name}Use_OneHotEnc={Use_OneHotEnc}.csv',mode='w')
+                            # Metrics4_data[j][f"{p*100}% of cat"][0].to_csv(f'/Users/ange-clementakazan/Documents/My_metrics/Special_Metrics/Cat_pert:{p}_Metric_{model_type}_{Which_solver}_{data_set_name}Use_OneHotEnc={Use_OneHotEnc}.csv',mode='w')
                     
                 Metric_dt=create_class_csv(j,perct_cat,Metrics4_data)
         # #Save it as csv
