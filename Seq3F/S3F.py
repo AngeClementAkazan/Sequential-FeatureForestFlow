@@ -675,6 +675,9 @@ class feature_forest_flow():
         solution = np.concatenate((solution, np.expand_dims(label_y, axis=1)), axis=1) 
       return solution
    
+
+# print(f"Column {col}: {len(unique_values)} unique categories, correctly in the range [0, ..., {N}]")  
+# Seperate dataset into multiple minibatches for memory-efficient training 
 # Check the category type 
 def check_categorical_columns(X, categorical_columns):
       for col in categorical_columns:
@@ -684,8 +687,6 @@ def check_categorical_columns(X, categorical_columns):
           assert np.array_equal(unique_values, expected_values), \
               f"Column {col} has missing categories or values outside the range [0, ..., {N}]. Use label encoding if necessary."
 
-# print(f"Column {col}: {len(unique_values)} unique categories, correctly in the range [0, ..., {N}]")  
-# Seperate dataset into multiple minibatches for memory-efficient training 
 class IterForDMatrix(xgb.core.DataIter):
     """A data iterator for XGBoost DMatrix.
     `reset` and `next` are required for any data iterator, the other functions here
