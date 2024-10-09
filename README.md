@@ -1,3 +1,15 @@
+<!-- ---
+jupyter:
+  jupytext:
+    cell_metadata_filter: -all
+    custom_cell_magics: kql
+    main_language: python
+    text_representation:
+      extension: .md
+      format_name: markdown
+      format_version: '1.3'
+      jupytext_version: 1.11.2
+--- -->
 # Generating Tabular Using Sequential FeatureForestFlow
 
 ## Description
@@ -26,7 +38,7 @@ For better understanding of this code, I have designed a simpler version on [Goo
 To clone this repository to your local machine, use the following command:
 
 *  git clone https://github.com/AngeClementAkazan/Sequential-FeatureForestFlow.git 
-* cd Forest-FLow-Based-Variable-Sampling 
+<!-- * cd Forest-FLow-Based-Variable-Sampling  -->
 
 ### Very mportant point
 * Your dataset needs to be in numpy format. If you're using a pandas dataset, you can convert it to numpy format by using the command `dataset_numpy = dataset.to_numpy()`. Additionally, it's acceptable for the dataset to include missing values, the code contain a data processing part.
@@ -55,6 +67,7 @@ with Minibatch Optimal Transport by Alexander Tong et. al [Github](https://githu
 ├── ForestFlow.py                #Contains the original ForestFlow Function from [Github](https://github.com/atong01/conditional-flow-matching)
 ├── License.txt                 # The license terms
 ├── README.md                   #This file
+├──Requirements.txt             #Contain requires lybraries
 ├── setup.py                    #File for installing project as a package
 └── Test_Model.py               #Test script for the package.
 
