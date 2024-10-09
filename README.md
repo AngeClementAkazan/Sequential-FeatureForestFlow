@@ -115,7 +115,8 @@ We also welcome contributions in the form of pull requests. If you'd like to con
 We'll review your pull request as soon as possible and provide feedback or merge it if it meets our guidelines.
 
 ## License
- <pre> MIT License
+ <pre> 
+ MIT License
 
 Copyright (c) 2024 Ange-Clément Akazan All Rights Reserved.
 
@@ -135,6 +136,7 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE. <\pre>
+SOFTWARE. 
+<\pre>
 
 <!-- #endregion -->
