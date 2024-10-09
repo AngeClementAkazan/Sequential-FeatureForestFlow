@@ -27,7 +27,7 @@ class feature_forest_flow():
                n_t=51, # number of noise level
                model='xgboost', # xgboost, random_forest, lgbm, catboost,
                solver_type='Rg4', # solver type: argument (Euler or Rg4)
-               model_type='HS3F', #HS3F for hybrid and  CS3F for regressor only,
+               model_type='HS3F', #HS3F for heterogenuous  and  CS3F for regressor only,
                one_hot_encoding=False,
                duplicate_K=100, # number of different noise sample per real data sample
               #  bin_indexes=[], # vector which indicates which column is binary 
@@ -41,7 +41,7 @@ class feature_forest_flow():
                n_z=10, # number of noise to use in zero-shot classification
                eps=0, 
                n_jobs=-1, # cpus used (feel free to limit it to something small, this will leave more cpus per model; for lgbm you have to use n_jobs=1, otherwise it will never finish)
-               n_batch=1, # If >0 use the data iterator with the specified number of batches
+               n_batch=0, # If >0 use the data iterator with the specified number of batches
                ngen=5, # The number generated batches, it will help us to limit the multinomial sampling in case the first variable of the data is categorical based on the class frequencies of this variable 
                seed=666,
                label_format="XgbClassifier", #Make sure the label are formatted according to the Xgboost classifier format [0,...,Max(Class)]
