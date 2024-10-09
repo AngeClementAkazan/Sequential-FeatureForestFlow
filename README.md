@@ -1,16 +1,3 @@
----
-jupyter:
-  jupytext:
-    cell_metadata_filter: -all
-    custom_cell_magics: kql
-    main_language: python
-    text_representation:
-      extension: .md
-      format_name: markdown
-      format_version: '1.3'
-      jupytext_version: 1.11.2
----
-
 
 # Generating Tabular Using Sequential FeatureForestFlow
 
