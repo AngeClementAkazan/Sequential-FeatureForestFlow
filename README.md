@@ -64,7 +64,7 @@ with Minibatch Optimal Transport by Alexander Tong et. al [Github](https://githu
 │   ├── utlis.py                #Contains functions that feeds Metrics.pyand S3F.py 
 │       
 ├── .gitignore                  #List of files ignored by git
-├── ForestFlow.py                #Contains the original ForestFlow Function from [Github](https://github.com/atong01/conditional-flow-matching)
+├── ForestFlow.py                #Contains the original ForestFlow Class
 ├── License.txt                 # The license terms
 ├── README.md                   #This file
 ├──Requirements.txt             #Contain requires lybraries
