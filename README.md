@@ -1,3 +1,16 @@
+---
+jupyter:
+  jupytext:
+    cell_metadata_filter: -all
+    custom_cell_magics: kql
+    main_language: python
+    text_representation:
+      extension: .md
+      format_name: markdown
+      format_version: '1.3'
+      jupytext_version: 1.11.2
+---
+
 <!-- ---
 jupyter:
   jupytext:
@@ -17,7 +30,7 @@ ForestFlow matching is powerful method for tabular data generation.  This method
 
 ![Result with IRIS data set](iris_plot.png)
 
-For better understanding of this code, I have designed a simpler version on [Google Colab](https://drive.google.com/file/d/13JOngqBCCOZc0ixlmDmLcIRPPljHyfvv/view?usp=sharing)
+<!-- For better understanding of this code, I have designed a simpler version on [Google Colab](https://drive.google.com/file/d/13JOngqBCCOZc0ixlmDmLcIRPPljHyfvv/view?usp=sharing) -->
 
 ## How to use this repository
  ### List of important hyperparameters
@@ -33,13 +46,15 @@ For better understanding of this code, I have designed a simpler version on [Goo
 * arg1 and arg2 are respectively, the remaining hyperparameter for tunning the regressor and the classifier ( We did not consider all the argument for our Xgboost regressor and classifier, ythe user will define them personnally if needed)
 
 
-### Cloning the Repository
-
+### Work With Repository
+1. Cloning
 To clone this repository to your local machine, use the following command:
-
-*  git clone https://github.com/AngeClementAkazan/Sequential-FeatureForestFlow.git 
-<!-- * cd Forest-FLow-Based-Variable-Sampling  -->
-
+    * git clone https://github.com/AngeClementAkazan/Sequential-FeatureForestFlow.git 
+    * cd Seq3F
+2. Running all the model for all the data after cloning
+    * To run this script, in your terminal run this:  `python -m unittest Test_Model_.Test_class.test`
+3. Reproduce the iris plot 
+    * Use the notebook `Iris_Plot.ipynb `
 ### Very mportant point
 * Your dataset needs to be in numpy format. If you're using a pandas dataset, you can convert it to numpy format by using the command `dataset_numpy = dataset.to_numpy()`. Additionally, it's acceptable for the dataset to include missing values, the code contain a data processing part.
 * The method uses a version of XGboost whose classifier models, demand that the class of each of the categorical variables of your  must have classes from {0,..., N}. Make sure you label encode your data.
