@@ -39,7 +39,7 @@ class feature_forest_flow():
                true_min_max_values=None, # Vector of form [[min_x, min_y], [max_x, max_y]]; If  provided, we use these values as the min/max for each variables when using clipping
                gpu_hist=False, # using GPU or not with xgboost
                n_z=10, # number of noise to use in zero-shot classification
-               eps=0, 
+               eps=1e-3, 
                n_jobs=-1, # cpus used (feel free to limit it to something small, this will leave more cpus per model; for lgbm you have to use n_jobs=1, otherwise it will never finish)
                n_batch=0, # If >0 use the data iterator with the specified number of batches
                ngen=5, # The number generated batches, it will help us to limit the multinomial sampling in case the first variable of the data is categorical based on the class frequencies of this variable 
@@ -97,6 +97,7 @@ class feature_forest_flow():
        X_dim_size=X.shape[1]+1
     else:
        X_dim_size=X.shape[1]
+       
     if self.cat_indexes is not None:
        if  self.cat_y== True :        
           mask_cat_bf= [i in self.cat_indexes  for i in range(X_dim_size-1)]+[True]  #Correct
@@ -647,7 +648,7 @@ class feature_forest_flow():
       dmat=self.n_batch > 0
       train_c=self.training_(self.X1)
       # Generate new data by solving the flow ODE
-      noise=np.random.normal(loc=0.1, scale=1.1,size=(self.b if batch_size is None else batch_size, self.c))
+      noise=np.random.normal(size=(self.b if batch_size is None else batch_size, self.c))
       # Generate random labels
       label_y = self.y_uniques[np.argmax(np.random.multinomial(1, self.y_probs, size=noise.shape[0]), axis=1)]
       mask_y = {} # mask for which observations has a specific value of y

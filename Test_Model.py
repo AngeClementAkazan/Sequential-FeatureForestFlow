@@ -59,10 +59,10 @@ class Test_class(unittest.TestCase):
                     Metrics4_data[name]=Metrics(ngen,nexp,model,name,
                                         N,K_dpl,which_solver,model_type,n_batch,n_jobs,label_cond,arg1,arg2,Sequential_Feature_forest_flow=True,mask_cat=None)
                     
-                    Metrics4_data[name][0].to_csv(parent+f'/FFM_Label_cond_{label_cond}_nt={N}_K={K_dpl}_Metrics_{model_type}_{which_solver}_n_batch{n_batch}_njobs:{n_jobs}_{name}.csv',mode='w')
+                    Metrics4_data[name][0].to_csv(parent+f'/{model_type}_{which_solver}_{name}.csv',mode='w')
                 Metric_dt=create_csv(data_set_name,Metrics4_data)
                 #Save it as csv in Your folder #
-                Metric_dt.to_csv(parent+f'/L_FFM_Label_cond:{label_cond}_nt={N}_K={K_dpl}_Metrics_{model_type}_1HE:cont_cat_{which_solver}.csv',mode='w')
+                Metric_dt.to_csv(parent+f'/S3F_{model_type}_{which_solver}.csv',mode='w')
 if __name__ == '__main__':
     unittest.main()
     

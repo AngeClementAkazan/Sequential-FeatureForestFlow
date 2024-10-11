@@ -45,13 +45,7 @@ To clone this repository to your local machine, use the following command:
 * The method uses a version of XGboost whose classifier models, demand that the class of each of the categorical variables of your  must have classes from {0,..., N}. Make sure you label encode your data.
 
 <!-- You can either set the  variable `Use_OneHotEnc` to `True` or before you input your model you can use an appropriate encoding method to respect this constraint. -->
-## Some references
-List of implemented papers:
 
-* Generating and Imputing Tabular Data via Diffusion and Flow-based
-Gradient-Boosted Trees by Alexia Joliecoeur et. al [Github](https://github.com/atong01/conditional-flow-matching)
-* Improving and Generalizing Flow-Based Generative Models
-with Minibatch Optimal Transport by Alexander Tong et. al [Github](https://github.com/atong01/conditional-flow-matching)
 ## Folder Structure
 <pre>
 │
@@ -91,7 +85,13 @@ with Minibatch Optimal Transport by Alexander Tong et. al [Github](https://githu
 └── Test_Model.py               #Test script for the package.
 
 </pre> -->
+## Some references
+List of implemented papers:
 
+* Generating and Imputing Tabular Data via Diffusion and Flow-based
+Gradient-Boosted Trees by Alexia Joliecoeur et. al [Github](https://github.com/atong01/conditional-flow-matching)
+* Improving and Generalizing Flow-Based Generative Models
+with Minibatch Optimal Transport by Alexander Tong et. al [Github](https://github.com/atong01/conditional-flow-matching)
  ## Contributing
 
 We welcome contributions from the community to help improve this project. If you encounter any issues or have suggestions for new features, please feel free to open an issue on GitHub.
