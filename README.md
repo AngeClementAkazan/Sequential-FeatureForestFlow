@@ -44,22 +44,29 @@ To clone this repository to your local machine, use the following command:
 
 ## Folder Structure
 <pre>
-│
+├── Plots_material/
+│   ├── CS3F_Euler_Results.csv     #CSV files for the CS3F-based Euler results 
+│   ├── CS3F_Euler_Results.csv     #CSV files for the CS3F-based Euler results
+│   ├── FFM.csv                    #CSV files for the ForestFlow results
+│   ├── CS3F_Euler_Results.csv     #CSV files for the CS3F-based Euler results
+│   ├── CS3F_Euler_Results.csv     #CSV files for the CS3F-based Euler results
+│   ├── Plotting_Values.ipynb      #Contains code for plotting  the results for all metrics for each of the methods used in this study
 ├── Seq3F/
-│   ├── __init__.py                 #Initialization file  
+│   ├── __init__.py                #Initialization file  
 │   ├── data_loader.py             #Contains functions for loading data
-│   ├── Metrics.py                  #Contains functions for calculating metrics
-│   ├── Flow_matching_class.py      #Contains classes and functions for flow matching
-│   ├── S3F.py                      # Contains the main Sequential-FeatureForestFlow class 
-│   ├── utlis.py                #Contains functions that feeds Metrics.pyand S3F.py 
+│   ├── Metrics.py                 #Contains functions for calculating metrics
+│   ├── Flow_matching_class.py     #Contains classes and functions for flow matching
+│   ├── S3F.py                     #Contains the main Sequential-FeatureForestFlow class 
+│   ├── utlis.py                   #Contains functions that feeds Metrics.pyand S3F.py 
 │       
-├── .gitignore                  #List of files ignored by git
-├── ForestFlow.py                #Contains the original ForestFlow Class
-├── License.txt                 # The license terms
-├── README.md                   #This file
-├──Requirements.txt             #Contain requires lybraries
-├── setup.py                    #File for installing project as a package
-└── Test_Model.py               #Test script for the package.
+├── .gitignore                      #List of files ignored by git (pycache and DS_Store)
+├── ForestFlow.py                   #Contains the original ForestFlow Class
+├── License.txt                     # The license terms
+├── Iris_Plot.ipynb                 #Contain code to reprodu ce the iris file
+├── README.md                       #This file
+├──Requirements.txt                 #Contain requires lybraries
+├── setup.py                        #File for installing project as a package
+└── Test_Model.py                   #Test script for the package.
 
 </pre>
 <!-- <pre>
