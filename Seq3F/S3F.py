@@ -43,8 +43,8 @@ class feature_forest_flow():
                n_jobs=-1, # cpus used (feel free to limit it to something small, this will leave more cpus per model; for lgbm you have to use n_jobs=1, otherwise it will never finish)
                n_batch=0, # If >0 use the data iterator with the specified number of batches
                ngen=5, # The number generated batches, it will help us to limit the multinomial sampling in case the first variable of the data is categorical based on the class frequencies of this variable 
-               seed=666,
-               label_format="XgbClassifier", #Make sure the label are formatted according to the Xgboost classifier format [0,...,Max(Class)]
+               seed=0,
+              #  label_format="XgbClassifier", #Make sure the label are formatted according to the Xgboost classifier format [0,...,Max(Class)]
                arg1={},arg2={}
                ): # you can pass extra parameter for xgboost using arg1 for Classifier and  arg2 for Xgb.Regressor
 
