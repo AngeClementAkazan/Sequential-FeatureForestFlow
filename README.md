@@ -9,19 +9,19 @@ ForestFlow matching is powerful method for tabular data generation.  This method
 
 ## How to use this repository
  ### List of important hyperparameters           
-* K_dpl= 100 is the number of time we duplicate our data| Its default value is
-* mask_cat: is the mask for categorical data (list containing True for categorical and False for Continuous)
-* N=50 is the number of noise level we are dealing with
+* K_dpl= 100 #is the number of time we duplicate our data
+* mask_cat: #is the mask for categorical data (list containing True for categorical and False for Continuous)
+* N=50 #is the number of noise level we are dealing with
 * cat_indexes=[], #Vector indicating which column is categorical/binary (the classes must be under the form [0,1,...,J]) if not, use label encoding before using your data.
-* int_indexes=[], # vector which indicates which column is an integer (ordinal variables such as number of cats in a box)
- solver_type= "RG4" takes two values: {"Euler": for Euler solver or "Rg4": for Runge Kutta solver}
-* model_type= 'HS3F'; specifies whether we use the mixed model (HS3F regressor and classifier) or regressor only CS3F.
-* n_batch= 0 is the number of mini batch| default value is 0| If >0 use the data iterator with the specified number of batches 
-* n_jobs= -1, specifies the number jobs you wish to exucute with your computing cores (-1 uses everything possible)
-* one_hot_encoding= False: Determine whether or not we will use one hot encoding (takes argument True or False)| but changing this is not necessary.
-* seed= 0 # random seed value
-* max_depth= 7 # max depth of the tree; recommended to leave at default
-* n_estimators= 100 # number of trees per XGBoost model; recommended to leave at default
+* int_indexes=[], #vector which indicates which column is an integer (ordinal variables such as number of cats in a box)
+ solver_type= "RG4" #takes two values: {"Euler": for Euler solver or "Rg4": for Runge Kutta solver}
+* model_type= 'HS3F'; #specifies whether we use the mixed model (`"HS3F"`:regressor and classifier or `"CS3F"`: regressor only.
+* n_batch= 0 #is the number of mini batch | If >0 use the data iterator with the specified number of batches 
+* n_jobs= -1, #specifies the number jobs you wish to exucute with your computing cores (-1 uses everything possible)
+* one_hot_encoding= False: #Determine whether or not we will use one hot encoding (takes argument True or False)| but changing this is not necessary.
+* seed= 0 #random seed value
+* max_depth= 7 #max depth of the tree; recommended to leave at default
+* n_estimators= 100 #number of trees per XGBoost model; recommended to leave at default
 * arg1 and arg2 are respectively, the remaining hyperparameter for tunning the regressor and the classifier ( We did not consider all the argument for our Xgboost regressor and classifier, ythe user will define them personnally if needed)
 
 
@@ -33,7 +33,7 @@ To clone this repository to your local machine, use the following command:
 2. Running all the model for all the data after cloning
     * To run this script, in your terminal run this:  `python -m unittest Test_Model_.Test_class.test`
 3. Reproduce the iris plot 
-    * Use the notebook `Iris_Plot.ipynb `
+    * Use the notebook `Iris_Plot.ipynb`
 4.  Navigating into the Seq3F folder where you can access useful functions
     * cd Seq3F 
 ### Very mportant point
