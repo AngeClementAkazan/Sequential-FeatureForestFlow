@@ -9,20 +9,20 @@ ForestFlow matching is powerful method for tabular data generation.  This method
 
 ## How to use this repository
  ### List of important hyperparameters           
-* K_dpl= 100 #is the number of time we duplicate our data
-* mask_cat: #is the mask for categorical data (list containing True for categorical and False for Continuous)
-* N=50 #is the number of noise level we are dealing with
+* K_dpl= 100 #is the number of time we duplicate our data.
+* mask_cat: #is the mask for categorical data (list containing True for categorical and False for Continuous).
+* N=50 #is the number of noise level we are dealing with.
 * cat_indexes=[], #Vector indicating which column is categorical/binary (the classes must be under the form [0,1,...,J]) if not, use label encoding before using your data.
-* int_indexes=[], #vector which indicates which column is an integer (ordinal variables such as number of cats in a box)
- solver_type= "RG4" #takes two values: {"Euler": for Euler solver or "Rg4": for Runge Kutta solver}
+* int_indexes=[], #vector which indicates which column is an integer (ordinal variables such as number of cats in a box).
+ solver_type= "RG4" #takes two values: {"Euler": for Euler solver or "Rg4": for Runge Kutta solver}.
 * model_type= 'HS3F'; #specifies whether we use the mixed model (`"HS3F"`:regressor and classifier or `"CS3F"`: regressor only).
-* n_batch= 0 #is the number of mini batch | If >0 use the data iterator with the specified number of batches 
-* n_jobs= -1, #specifies the number jobs you wish to exucute with your computing cores (-1 uses everything possible)
+* n_batch= 0 #is the number of mini batch | If >0 use the data iterator with the specified number of batches.
+* n_jobs= -1, #specifies the number jobs you wish to exucute with your computing cores (-1 uses everything possible).
 * one_hot_encoding= False: #Determine whether or not we will use one hot encoding (takes argument True or False)| but changing this is not necessary.
-* seed= 0 #random seed value
-* max_depth= 7 #max depth of the tree; recommended to leave at default
-* n_estimators= 100 #number of trees per XGBoost model; recommended to leave at default
-* arg1 and arg2 are respectively, the remaining hyperparameter for tunning the regressor and the classifier ( We did not consider all the argument for our Xgboost regressor and classifier, ythe user will define them personnally if needed)
+* seed= 0 #random seed value.
+* max_depth= 7 #max depth of the tree; recommended to leave at default.
+* n_estimators= 100 #number of trees per XGBoost model; recommended to leave at default.
+* arg1 and arg2 are respectively, the remaining hyperparameter for tunning the regressor and the classifier ( We did not consider all the argument for our Xgboost regressor and classifier, ythe user will define them personnally if needed).
 
 
 ### Work With Repository
