@@ -36,7 +36,7 @@ To clone this repository to your local machine, use the following command:
     * Use the notebook `Iris_Plot.ipynb`
 4.  Navigating into the Seq3F folder where you can access useful functions
     * cd Seq3F 
-### Very mportant point
+### Important Notes
 * Your dataset needs to be in numpy format. If you're using a pandas dataset, you can convert it to numpy format by using the command `dataset_numpy = dataset.to_numpy()`. Additionally, it's acceptable for the dataset to include missing values, the code contain a data processing part.
 * The method uses a version of XGboost whose classifier models, demand that the class of each of the categorical variables of your  must have classes from {0,..., N}. Make sure you label encode your data.
 
