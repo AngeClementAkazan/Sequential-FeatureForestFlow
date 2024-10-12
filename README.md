@@ -15,7 +15,7 @@ ForestFlow matching is powerful method for tabular data generation.  This method
 * cat_indexes=[], #Vector indicating which column is categorical/binary (the classes must be under the form [0,1,...,J]) if not, use label encoding before using your data.
 * int_indexes=[], #vector which indicates which column is an integer (ordinal variables such as number of cats in a box)
  solver_type= "RG4" #takes two values: {"Euler": for Euler solver or "Rg4": for Runge Kutta solver}
-* model_type= 'HS3F'; #specifies whether we use the mixed model (`"HS3F"`:regressor and classifier or `"CS3F"`: regressor only.
+* model_type= 'HS3F'; #specifies whether we use the mixed model (`"HS3F"`:regressor and classifier or `"CS3F"`: regressor only).
 * n_batch= 0 #is the number of mini batch | If >0 use the data iterator with the specified number of batches 
 * n_jobs= -1, #specifies the number jobs you wish to exucute with your computing cores (-1 uses everything possible)
 * one_hot_encoding= False: #Determine whether or not we will use one hot encoding (takes argument True or False)| but changing this is not necessary.
