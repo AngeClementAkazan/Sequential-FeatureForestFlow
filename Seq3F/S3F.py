@@ -24,7 +24,7 @@ class feature_forest_flow():
                X, # Must be a Numpy dataset and 
                label_y=None, # # must be a categorical/binary variable| When None then X shopuld be the entire data set
                cat_y=True, # Binary variable indicating whether or not the output is categorical
-               n_t=51, # number of noise level
+               n_t=50, # number of noise level
                model='xgboost', # xgboost, random_forest, lgbm, catboost,
                solver_type='Rg4', # solver type: argument (Euler or Rg4)
                model_type='HS3F', #HS3F for heterogenuous  and  CS3F for regressor only,
