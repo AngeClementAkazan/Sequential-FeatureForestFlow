@@ -212,3 +212,63 @@ def minmax_scale_dummy(X_train, X_test, msk_ct,divide_by=2, mask=None):
         X_train_t = X_train_test[0:n,:]
         X_test_t= X_train_test[n:,:]
     return X_train_t, X_test_t, scaler,mask, df_names_before, df_names_after
+
+# print(f"Column {col}: {len(unique_values)} unique categories, correctly in the range [0, ..., {N}]")  
+# Seperate dataset into multiple minibatches for memory-efficient training 
+# Check the category type 
+def check_categorical_columns(X, categorical_columns):
+      for col in categorical_columns:
+          unique_values = np.unique(X[:, col])  # Find unique values in the column
+          N = unique_values.max()  # Maximum category value
+          expected_values = np.arange(0, N + 1)  # Expected range [0, ..., N]
+          assert np.array_equal(unique_values, expected_values), \
+              f"Column {col} has missing categories or values outside the range [0, ..., {N}]. Use label encoding if necessary."
+
+class IterForDMatrix(xgb.core.DataIter):
+    """A data iterator for XGBoost DMatrix.
+    `reset` and `next` are required for any data iterator, the other functions here
+    are utilites for demonstration's purpose.
+    mask_cat and and get_xt_y are respectively functions to concatenate the input of the velocity vector and get a conditional flow at time t
+    """
+    def __init__(self, data,mask_cat,n_t,get_xt_y,make_mat,t,i, dim,model_type="HS3F",   n_batch=1000, n_epochs=10, eps=1e-3):
+        self._data = data
+        self.n_batch = n_batch
+        self.n_epochs = n_epochs
+        self.t = t
+        self.make_mat=make_mat
+        self.eps = eps
+        self.dim = dim
+        self.it = 0  # set iterator to 0
+        self.n_t=n_t
+        self.i=i
+        self.model_type=model_type
+        self.mask_cat=mask_cat
+        self.get_xt_y=get_xt_y
+        super().__init__()
+
+    def reset(self):
+      """Reset the iterator"""
+      self.it = 0
+
+    def next(self, input_data):
+      """Yield next batch of data."""
+      if self.it == self.n_batch*self.n_epochs: # stops after k epochs
+        return 0
+      x1=self._data[self.it % self.n_batch]
+      if self.dim==0:
+        if not self.mask_cat[self.dim]: 
+          X_t,y= self.get_xt_y(x1,self.dim,self.t,self.i) 
+          y_no_miss = ~np.isnan(y.ravel())
+          input_data(data=X_t[y_no_miss, :], label=y[y_no_miss])
+          self.it += 1  
+        #If this is not respected then we move because the first categorical variable is generated using a multinomial sampling based on the class frequencies of this variable 
+      else:
+        if self.mask_cat[self.dim] and self.model_type== "HS3F": 
+          x_t,y= self.make_mat(x1,self.dim),x1[:,self.dim]   
+        else:
+          X_t,y= self.get_xt_y(x1,self.dim,self.t,self.i) 
+          x_t= self.make_mat(x1,self.dim,X_t) 
+        y_no_miss = ~np.isnan(y.ravel())
+        input_data(data=x_t[y_no_miss, :], label=y[y_no_miss])
+        self.it += 1
+      return 1

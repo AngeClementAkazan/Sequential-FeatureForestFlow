@@ -7,7 +7,7 @@ import numpy as np
 import copy
 import xgboost as xgb
 from functools import partial
-# from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor
 # from lightgbm import LGBMRegressor
 # from catboost import CatBoostRegressor
 from sklearn.preprocessing import MinMaxScaler

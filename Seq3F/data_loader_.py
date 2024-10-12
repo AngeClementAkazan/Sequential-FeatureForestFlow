@@ -9,7 +9,7 @@ import copy
 import numpy as np
 import wget
 
-
+# This code is from (https://github.com/SamsungSAILMontreal/ForestDiffusion)
 DATASETS = ['iris', 'wine', 'california', 'parkinsons', \
             'climate_model_crashes', 'concrete_compression', \
             'yacht_hydrodynamics', 'airfoil_self_noise', \

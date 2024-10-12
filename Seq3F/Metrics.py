@@ -75,12 +75,13 @@ def Metrics(ngen,nexp,model,data_name,n_t,K_dpl,which_solver,model_type,
         for test_type2 in ['mean','lin','linboost', 'tree', 'treeboost']:
             R2[test_type][test_type2] = 0.0
             f1[test_type][test_type2] = 0.0
+    # If Mask_cat is not provided then define it based on the categorical index provided
     if mask_cat== None:
         if cat_indexes is not None:
             if  cat_y or bin_y:        
-                mask_cat= [i in cat_indexes  for i in range(X.shape[1]-1)]+[True]  #Correct
+                mask_cat= [i in cat_indexes or i in bin_y  for i in range(X.shape[1]-1)]+[True]  #Correct
             else:
-                mask_cat= [i in cat_indexes  for i in range(X.shape[1]-1)]+[False]  #Correct
+                mask_cat= [i in cat_indexes or i in bin_y  for i in range(X.shape[1]-1)]+[False]  #Correct
         else:
             if  cat_y or bin_y:      
                 mask_cat=[False]*(X.shape[1]-1) +[True]
@@ -97,7 +98,9 @@ def Metrics(ngen,nexp,model,data_name,n_t,K_dpl,which_solver,model_type,
             if Sequential_Feature_forest_flow== True:
                 if label_cond==True and cat_y:
                     forest_model = model(X=Xy_train[:,:-1], 
-                            label_y=Xy_train[:,-1],
+                            y=Xy_train[:,-1], # Output  data
+                            label_cond=label_cond, #Boolean argument that specifies wether or not we use label-based conditional generation  
+                            cat_y=cat_y, # Binary variable indicating whether or not the output is categorical
                             n_t=n_t, # number of noise level
                             model='xgboost', # xgboost, random_forest, lgbm, catboost,
                             solver_type=which_solver,
@@ -106,13 +109,15 @@ def Metrics(ngen,nexp,model,data_name,n_t,K_dpl,which_solver,model_type,
                             # bin_indexes=bin_indexes, # vector which indicates which column is binary
                             cat_indexes=cat_indexes, #Vector indicating which column is categorical
                             int_indexes=int_indexes, # vector which indicates which column is an integer (ordinal variables such as number of cats in a box)
-                            cat_y=cat_y, # Binary variable indicating whether or not the output is categorical
                             n_jobs=n_jobs, # cpus used (feel free to limit it to something small, this will leave more cpus per model; for lgbm you have to use n_jobs=1, otherwise it will never finish)
                             n_batch=n_batch, # If >0 use the data iterator with the specified number of batches
                             ngen=ngen,
                             seed=n)
                 else:                   
-                    forest_model = model(X=Xy_train, 
+                    forest_model = model(X=Xy_train[:,:-1], 
+                            y=Xy_train[:,-1], # Output  data
+                            label_cond=label_cond, #Boolean argument that specifies wether or not we use label-based conditional generation  
+                            cat_y=cat_y, # Binary variable indicating whether or not the output is categorical
                             n_t=n_t, # number of noise level
                             model='xgboost', # xgboost, random_forest, lgbm, catboost,
                             solver_type=which_solver,
@@ -121,7 +126,6 @@ def Metrics(ngen,nexp,model,data_name,n_t,K_dpl,which_solver,model_type,
                             # bin_indexes=bin_indexes, # vector which indicates which column is binary
                             cat_indexes=cat_indexes, #Vector indicating which column is categorical
                             int_indexes=int_indexes, # vector which indicates which column is an integer (ordinal variables such as number of cats in a box)
-                            cat_y=cat_y, # Binary variable indicating whether or not the output is categorical
                             n_jobs=n_jobs, # cpus used (feel free to limit it to something small, this will leave more cpus per model; for lgbm you have to use n_jobs=1, otherwise it will never finish)
                             n_batch=n_batch, # If >0 use the data iterator with the specified number of batches
                             ngen=ngen,
@@ -137,7 +141,7 @@ def Metrics(ngen,nexp,model,data_name,n_t,K_dpl,which_solver,model_type,
                             n_t=n_t,
                             model='xgboost', # in random_forest, xgboost, lgbm
                             duplicate_K=K_dpl,
-                            # bin_indexes=bin_indexes,
+                            bin_indexes=bin_y,
                             cat_indexes=cat_indexes,
                             int_indexes=int_indexes,
                             n_jobs=n_jobs,
@@ -148,7 +152,7 @@ def Metrics(ngen,nexp,model,data_name,n_t,K_dpl,which_solver,model_type,
                         n_t=n_t,
                         model='xgboost', # in random_forest, xgboost, lgbm
                         duplicate_K=K_dpl,
-                        # bin_indexes=bin_indexes, # vector which indicates which column is binary
+                        bin_indexes=bin_y, # vector which indicates which column is binary
                         cat_indexes=cat_indexes, #Vector indicating which column is categorical
                         int_indexes=int_indexes, # vector which indicates which column is an integer (ordinal variables such as number of cats in a box)
                         n_jobs=n_jobs,

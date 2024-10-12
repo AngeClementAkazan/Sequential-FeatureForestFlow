@@ -1,8 +1,10 @@
+
 import math
 import numpy as np
 import copy
 import xgboost as xgb
 from functools import partial
+from Seq3F.utils_ import IterForDMatrix
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 # from lightgbm import LGBMRegressor,LGBMClassifier
 # from catboost import CatBoostRegressor,CatBoostClassifier
@@ -14,46 +16,44 @@ from scipy.special import softmax
 import random
 
 
-# Class for the SF3 framework
+#################################### Class for the Sequential FeatureForestFlow framework ########################################
+# The data should be a numpy array 
 # Categorical features should be numerical (rather than strings), make sure to use x = pd.factorize(x)[0] to make them as such
 # Make sure to specific which features are categorical and which are integers
 # If you have categorical variable whose label does not respect {0,..,N} for instance {1,...,N}, try to label encod the data first to make the label starting from zero to the Nth label
 
 class feature_forest_flow():
   def __init__(self, 
-               X, # Must be a Numpy dataset and 
-               label_y=None, # # must be a categorical/binary variable| When None then X shopuld be the entire data set
-               cat_y=True, # Binary variable indicating whether or not the output is categorical
+               X, # Input data
+               y, # Output  data
+               label_cond=False, #Boolean argument that specifies wether or not we use label-based conditional generation  
+               cat_y=True, # Boolean variable indicating whether or not the output is categorical
                n_t=50, # number of noise level
-               model='xgboost', # xgboost, random_forest, lgbm, catboost,
-               solver_type='Rg4', # solver type: argument (Euler or Rg4)
+               model='xgboost', # Xgboost model for conditional velocity learning (could be any other ML model)
+               solver_type='Rg4', # Solver type: argument (Euler or Rg4)
                model_type='HS3F', #HS3F for heterogenuous  and  CS3F for regressor only,
-               one_hot_encoding=False,
+               one_hot_encoding=False, #Boolean variable indicating whether or not we encode our categorical data
                duplicate_K=100, # number of different noise sample per real data sample
-              #  bin_indexes=[], # vector which indicates which column is binary 
                cat_indexes=[], #Vector indicating which column is categorical/binary (the classes must be under the form [0,1,...,J]) if not, use label encoding before using your data
-               int_indexes=[], # vector which indicates which column is an integer (ordinal variables such as number of cats in a box)
+               int_indexes=[], # vector which indicates which column is an integer (ordinal variables such as quantities (e.g. number of houses or cars in a locations))
                max_depth = 7, n_estimators = 100, eta=0.3,   learning_rate=0.3, # xgboost hyperparameters
                tree_method='hist', reg_alpha=0.0, reg_lambda = 0.0, subsample=1.0, # xgboost hyperparameters
-               num_leaves=31, # lgbm hyperparameters
                true_min_max_values=None, # Vector of form [[min_x, min_y], [max_x, max_y]]; If  provided, we use these values as the min/max for each variables when using clipping
                gpu_hist=False, # using GPU or not with xgboost
-               n_z=10, # number of noise to use in zero-shot classification
-               eps=1e-3, 
+               t_0=1e-3, # Time intialization
                n_jobs=-1, # cpus used (feel free to limit it to something small, this will leave more cpus per model; for lgbm you have to use n_jobs=1, otherwise it will never finish)
                n_batch=0, # If >0 use the data iterator with the specified number of batches
                ngen=5, # The number generated batches, it will help us to limit the multinomial sampling in case the first variable of the data is categorical based on the class frequencies of this variable 
-               seed=0,
-              #  label_format="XgbClassifier", #Make sure the label are formatted according to the Xgboost classifier format [0,...,Max(Class)]
-               arg1={},arg2={}
-               ): # you can pass extra parameter for xgboost using arg1 for Classifier and  arg2 for Xgb.Regressor
-
+               seed=0, # Seed to control randomness
+               arg1={},arg2={} # you can pass extra parameter for xgboost using arg1 for Classifier and  arg2 for Xgb.Regressor
+               ): 
+    np.random.seed(seed)
     assert isinstance(X, np.ndarray), "Input dataset must be a Numpy array"
     assert len(X.shape)==2, "Input dataset must have two dimensions [n,p]"
-    assert "All the category must be in the form [0,...,N], use label encoding if it is not the case"
-    np.random.seed(seed)
-    self.ngen=ngen 
-    self.one_hot_encoding=one_hot_encoding
+    # Attribute intialization
+    # self.y=y
+    self.label_cond=label_cond
+    self.cat_y = cat_y
     self.n_t = n_t 
     self.duplicate_K = duplicate_K
     self.model = model
@@ -61,7 +61,6 @@ class feature_forest_flow():
     self.n_estimators = n_estimators
     self.max_depth = max_depth
     self.seed = seed
-    self.num_leaves = num_leaves
     self.eta = eta,
     self.learning_rate=  learning_rate
     self.gpu_hist = gpu_hist
@@ -70,53 +69,37 @@ class feature_forest_flow():
     self.reg_lambda = reg_lambda
     self.reg_alpha = reg_alpha
     self.subsample = subsample
-    self.n_z = n_z
-    self.eps = eps
+    self.t_0 = t_0
     self.n_batch = n_batch
     self.model_type=model_type
-    self.t_levels = np.linspace(self.eps, 1, num=self.n_t)
+    self.t_levels = np.linspace(self.t_0, 1, num=self.n_t)
     self.arg1 = arg1
     self.arg2 = arg2
-    self.ls=[]
-    # try:
-    #   int_indexes = int_indexes + bin_indexes # since we round those, we do not need to dummy-code the binary variables
-    # except:
-    #    int_indexes=[]
-    # Categorical input encompasses binary input
-    # try:
-    #    cat_indexes= cat_indexes +bin_indexes
-    # except:
-    #    cat_indexes=cat_indexes
-    self.cat_y = cat_y
+    self.ngen=ngen 
+    self.one_hot_encoding=one_hot_encoding
     self.int_indexes = int_indexes
     self.cat_indexes=cat_indexes
-    # self.bin_indexes=bin_indexes
-    
-    # Construct a categorical mask for the variable (True if categorical and False otherwise)
-    if label_y is not None:
-       X_dim_size=X.shape[1]+1
-    else:
-       X_dim_size=X.shape[1]
-       
-    if self.cat_indexes is not None:
-       if  self.cat_y== True :        
-          mask_cat_bf= [i in self.cat_indexes  for i in range(X_dim_size-1)]+[True]  #Correct
-       else:
-          mask_cat_bf= [i in self.cat_indexes  for i in range(X_dim_size-1)]+[False]  #Correct
-    else:
-       if  self.cat_y== True:      
-          mask_cat_bf=[False]*(X_dim_size-1) +[True]
-       else:
-          mask_cat_bf=[False]*X_dim_size
-    #Jesus
-     # Remove all missing values and shuffle data
+ 
+    X_dim_size=X.shape[1]
+    # Create a categorical mask that will specify whether or not a columns is categorical (True if categorical and False otherwise), this will help for the choice of the training models and for generation
+    if self.cat_indexes is not None:     
+          mask_cat_bf= [i in self.cat_indexes  for i in range(X_dim_size)]+[self.cat_y] 
+    else:     
+          mask_cat_bf=[False]*X_dim_size +[self.cat_y]
+
+    # If we do not use label_cond then we concatenate the input data and the output 
+    if not self.label_cond:
+       X=np.concatenate((X,y.reshape(-1,1)), axis=1)
+    # Remove all missing values 
     obs_to_remove = np.isnan(X).any(axis=1)
     X = X[~obs_to_remove]
-    # print(np.unique(X[:,-1]))
-    if label_y is not None:
-      #  X=X[:,:-1]
+
+    # If the label condition is activated then we reduce the mask value of the output
+    label_y=None 
+    if self.label_cond:
        mask_cat_bf= mask_cat_bf[:-1]
-       label_y = label_y[~obs_to_remove]     
+       label_y = y[~obs_to_remove]  
+          
     if true_min_max_values is not None:
         self.X_min = true_min_max_values[0]
         self.X_max = true_min_max_values[1]
@@ -124,23 +107,23 @@ class feature_forest_flow():
         self.X_min = np.nanmin(X, axis=0, keepdims=1)
         self.X_max = np.nanmax(X, axis=0, keepdims=1)
 
-    #Set the label conditionning conditions
+    #Set the label conditionning attribute
     self.label_y = label_y
     self.mask_cat_bf= mask_cat_bf
-    self.cat_indexes_=[i for i in range(len(self.mask_cat_bf)) if self.mask_cat_bf[i] ] # Index of categorical variables before on hot encoding
-    #Check if the categories are under the form [0,..., Max(classes)] it is important for the Xgboost CLassifier
-    # check_categorical_columns(X, self.cat_indexes_)
+    # Index of categorical variables
+    self.cat_indexes_=[i for i in range(len(self.mask_cat_bf)) if self.mask_cat_bf[i] ] 
     #Number of  categorical variables
     num_cat_index=len( self.cat_indexes_)
-    self.num_cat_index=num_cat_index      
-    mask_cat=copy.deepcopy(self.mask_cat_bf) 
-
+    self.num_cat_index=num_cat_index  
+   
     #min-max normalization, this does not apply to the categorical data because they will be handled by a classifier
     self.scaler = MinMaxScaler(feature_range=(-1, 1))
     if self.num_cat_index  < len(self.mask_cat_bf):
         X[:,~np.array(self.mask_cat_bf)]=self.scaler.fit_transform(X[:,~np.array(self.mask_cat_bf)])
 
-    #if there is categorical variable and and the variable one_hot_encoding is set to True
+    ## if there are  categorical variables and the variable one_hot_encoding is set to True then we dummify the data and update the mask
+    #Initialize the new mask     
+    mask_cat=copy.deepcopy(self.mask_cat_bf) 
     if self.num_cat_index > 0 and self.one_hot_encoding: 
         X, self.X_names_before, self.X_names_after,mask_cat= self.dummify(X) # dummy-coding for categorical variables 
     self.X=X
@@ -148,8 +131,9 @@ class feature_forest_flow():
     self.row_number=self.ngen*self.b
     self.mask_cat=mask_cat
 
-    if model == 'random_forest' and np.sum(np.isnan(X)) > 0:
-      raise  Exception('The dataset must not contain missing data in order to use model=random_forest')
+    # if model == 'random_forest' and np.sum(np.isnan(X)) > 0:
+    #   raise  Exception('The dataset must not contain missing data in order to use model=random_forest')
+    
     X1=copy.deepcopy(self.X)
     label_y_=self.label_y
     if self.n_batch == 0: 
@@ -160,8 +144,8 @@ class feature_forest_flow():
         label_y_=np.tile(self.label_y, duplicate_K)
     row_X1,_=X1.shape
     self.X1=X1
-    # print(self.X1.shape,duplicate_K)
-    #Set the label conditionning conditions
+    
+    #Define a mask that will help for generation based on output label
     if self.label_y is not None:
       assert np.sum(np.isnan(self.label_y)) == 0 # cannot have missing values in the label (just make a special categorical for nan if you need)
       self.y_uniques, self.y_probs = np.unique(label_y_, return_counts=True)
@@ -242,7 +226,8 @@ class feature_forest_flow():
       x0_probs = x0_probs/np.sum(x0_probs)
       x0_2get=x0_uniques[np.argmax(np.random.multinomial(1, x0_probs, size=(self.row_number,)), axis=1)]
       return x0_2get
-  #This define the forward process (Condition flow and velocity vector gathering for time step t and all feature )
+  
+  #This define the forward process (Conditional flow and velocity vector gathering for time step t and all feature )
   def forward_process(self,X,sigma=0.0): 
       b, c =  X.shape       
       X_train = np.zeros((c, self.n_t, b,1))              # [c,n_t, b*100, 1]  # Will contain the interpolation between x0 and x1 (xt)   
@@ -256,13 +241,15 @@ class feature_forest_flow():
               xt, ut =  t*X[:,j].reshape(-1,1)+ (1-t)*X0[:,j].reshape(-1,1), X[:,j].reshape(-1,1)-X0[:,j].reshape(-1,1)  # Fill the containers previously initialized with xt and ut
               X_train[j][i][:], y_train[j][i][:] = xt+sigma*eps[:,j].reshape(-1,1), ut.reshape(-1,1)
       return X_train, y_train,X
- #Get conditional flow and velocity vector for a given t, this helpful for the training by batch
+  
+  #Get conditional flow and velocity vector for a given t, this helpful for the training by batch
   def get_xt_y(self,X,k,t,i): 
     b,_=  X.shape
     X0 = np.random.normal(size=(b,1))        
     xt, ut =  t*X[:,k].reshape(-1,1)+ (1-t)*X0, X[:,k].reshape(-1,1)-X0
     return xt, ut 
-  # Make Datasets of interpolation (gather features in order to create training input for Xgb.Regressor and Xgb.Classifier)
+  
+  # Create training input for Xgb.Regressor or Xgb.Classifier for learning conditional velocity vector and current variable respectively 
   def make_mat(self,Mat,k,x_chunk=None):  
       if self.mask_cat[k] and self.model_type=="HS3F":
           A=()
@@ -279,7 +266,7 @@ class feature_forest_flow():
           if k==0:
             return x_chunk
           else:        
-            A=(x_chunk,)
+            A=(x_chunk,) #x_chank represent the conditional flow value that will be concatenated with previous input data
             for h in range(k):
                 A+=(Mat[:,h].reshape(-1,1),)
             X_train=np.concatenate(A,axis=1)             
@@ -328,13 +315,14 @@ class feature_forest_flow():
                           if k==0:                           
                               results_cat.append(self.samp_mult(X[:,k]) ) 
                           else:
-                                                                            
+                              # We train classifier models and store them in a list                                               
                               for j in range(len(self.y_uniques)):                                      
                                   Yy=X[self.mask_y[j],k]
                                   X_train=self.make_mat(X[self.mask_y[j]],k)
                                   result= self.train_cont_cat(X_train,Yy,k)
                                   results_cat.append(result)
-                      else:   #if the categorical mask is False then we do the following operations  
+                      else:   
+                          # We train regressor models and store them in a list 
                           for j in range(len(self.y_uniques)): 
                               for i in range(self.n_t):          
                                   X_train_chunk,y_train_chunk= f[k][i][self.mask_y[j]], g[k][i][self.mask_y[j]]
@@ -347,7 +335,9 @@ class feature_forest_flow():
                           for i in range(self.n_t):
                                   regr_[kk][j][i] = results_cont[current_i_cont]
                                   current_i_cont += 1
-              return regr_,results_cat 
+              return regr_,results_cat # Return the list containing the trained regressor and classifier models
+        
+
         elif self.model_type== "CS3F":  #To choose only model for continuous settings
             if self.n_batch>0: 
                 for k in range(c):
@@ -395,6 +385,7 @@ class feature_forest_flow():
                     current_i_cont += 1
           
           return regr_,results_cat
+      
       elif self.model_type== "CS3F":
           if self.n_batch > 0:
               results_cont+=Parallel(n_jobs=self.n_jobs)(delayed(self.train_iterator)( X1_splitted[j],self.n_t, k,self.t_levels[l],
@@ -479,7 +470,7 @@ class feature_forest_flow():
       else:         #x receives the previous variable having been 
           x = np.concatenate((x_k, x_prev), axis=1) # We respect the training structure for continuous variable that is: the model reveives (X_noise, Variable1,...,Variable k-1) to predict Variable k    
       x_=x[mask_y[label]]
-      if dmat:
+      if dmat: # If we use the minibatch training ( therefore make use of Dmatrix)
         X=xgb.DMatrix(data=x_)
         out[mask_y[label], k] = tr_container[0][cont_count][j][i].predict(X)
         return out
@@ -487,7 +478,7 @@ class feature_forest_flow():
         out[mask_y[label], k] = tr_container[0][cont_count][j][i].predict(x_)   
         return out
       
- # Building the categorical feature generation model 
+ # This function determine the categorical feature generation model, where we extract the trained model from tr_container and use the previously generated input (x_prev)
   def my_model_cat(self,tr_container,noise,j,label,k,cat_count,dmat,mask_y, x_prev):
       row_noise=noise.shape[0]
       out = np.zeros((row_noise,self.c)) # [b, c]
@@ -524,13 +515,14 @@ class feature_forest_flow():
   # Euler ODE solver
   def euler_solve(self,tr_container,noise,x_k,label,mask_y,dmat):     
       h = 1 / (self.n_t-1)
-      x_prev = None     #Used to store the generated column x_{t-1} to generated column x_t
+      x_prev = None     #Used to store the generated columns to generate the next column x_t
       A=()     #A is the container that will receive all the generated variables
       #The cat_count and cont_count argument serve to pick the right model respectively from the categorical and continuous list of models
       cat_count=0
       cont_count=0
       row_noise=noise.shape[0]
       if self.model_type == "HS3F":
+        # Iterate over the columns for feature generation
         for k in range(self.c):
             if self.mask_cat[k]:
                 x_k=np.zeros((row_noise,1))
@@ -542,11 +534,9 @@ class feature_forest_flow():
                   for j, label in enumerate(self.y_uniques):
                     x_k+=self.my_model_cat(tr_container,noise,j,label,k,cat_count,dmat,mask_y, x_prev=x_prev)[:,k].reshape(-1,1)
                     cat_count+=1
-                    # # In case the class  format does not match with the xgboost classifier expected format ([0,1,...,J])
-                    # if not (np.unique(self.X[:,mask_y[label]], return_counts=False)==np.unique(x_k, return_counts=False)).all():
-                    #       x_k=self.label_inverse(x_k) 
+                    
             else:
-                ##Choose  ===>  x_k=np.random.normal(size=(row_noise,1)) for the default ODE initial condition and ===> x_k=np.random.normal(loc=0.1, scale=1.1,size=(row_noise,1)) for Modified initial condition
+                ##Choose  ===>  x_k=np.random.normal(size=(row_noise,1)) for the default ODE initial condition and ===> x_k=np.random.normal(loc=a, scale=b,size=(row_noise,1)) for Modified initial condition
                 x_k=np.random.normal(size=(row_noise,1))
                 for j, label in enumerate(self.y_uniques):
                   t=0           
@@ -554,8 +544,9 @@ class feature_forest_flow():
                       x_k+= h*self.my_model_cont(tr_container,noise,j,label,t,k,cont_count,dmat,mask_y,x_k, x_prev=x_prev)[:,k].reshape(-1,1) # k because we want to return the k th column preddicted by the model
                       t = t + h
                 cont_count+=1
+            # Create input with noise and the previously generated features
             if x_prev is None:
-                x_prev = x_k  #At k=0, xprev get x_0
+                x_prev = x_k  #At k=0, xprev get  x_0
             else:
                 x_prev = np.concatenate((x_prev,x_k), axis=1) # At k!=0, x_prev receive the previous generated value x_0,...,x_{k-1} plus the generated value of x_k that will be the input for the next generation
             A+=(x_k,)
@@ -563,11 +554,11 @@ class feature_forest_flow():
         return A
       elif self.model_type == "CS3F":
         for k in range(self.c):
-          ##Choose  ===>  x_k=np.random.normal(size=(row_noise,1)) for the default ODE initial condition and ===> x_k=np.random.normal(loc=0.1, scale=1.1,size=(row_noise,1)) for Modified initial condition
+          ##Choose  ===>  x_k=np.random.normal(size=(row_noise,1)) for the default ODE initial condition and ===> x_k=np.random.normal(loc=a, scale=b,size=(row_noise,1)) for Modified initial condition
           x_k=np.random.normal(size=(row_noise,1))
           for j, label in enumerate(self.y_uniques):
             t=0           
-            for i in range(self.n_t ):  # Loop for numerical solver
+            for i in range(self.n_t):  # Loop for numerical solver
                 x_k+= h*self.my_model_cont(tr_container,noise,j,label,t,k,cont_count,dmat,mask_y,x_k, x_prev=x_prev)[:,k].reshape(-1,1) # k because we want to return the k th column preddicted by the model
                 t = t + h
           cont_count+=1
@@ -601,7 +592,7 @@ class feature_forest_flow():
                     x_k+=self.my_model_cat(tr_container,noise,j,label,k,cat_count,dmat,mask_y, x_prev=x_prev)[:,k].reshape(-1,1)
                     cat_count+=1               
             else:
-                ##Choose  ===>  x_k=np.random.normal(size=(row_noise,1)) for the default ODE initial condition and ===> x_k=np.random.normal(loc=0.1, scale=1.1,size=(row_noise,1)) for Modified initial condition
+                ##Choose  ===>  x_k=np.random.normal(size=(row_noise,1)) for the default ODE initial condition and ===> x_k=np.random.normal(loc=a, scale=b,size=(row_noise,1)) for Modified initial condition
                 x_k=np.random.normal(size=(row_noise,1))
                 for j, label in enumerate(self.y_uniques):
                   t=0           
@@ -622,10 +613,10 @@ class feature_forest_flow():
         return A
       elif self.model_type == "CS3F":
         for k in range(self.c):
-          x_k=np.random.normal(size=(row_noise,1)) #x_k=np.random.normal(loc=0.1, scale=1.1,size=(row_noise,1))is the Affine transformation of x_k
+          x_k=np.random.normal(size=(row_noise,1)) #x_k=np.random.normal(loc=a, scale=b,size=(row_noise,1))is the Affine transformation of x_k
           for j, label in enumerate(self.y_uniques):
             t=0           
-            for i in range(self.n_t-1 ):  # Loop for numerical solver
+            for i in range(self.n_t-1):  # Loop for numerical solver
                 k1= h*self.my_model_cont(tr_container,noise,j,label,t,k,cont_count,dmat,mask_y,x_k, x_prev=x_prev)[:,k].reshape(-1,1) # k because we want to return the k th column preddicted by the model
                 k2= h*self.my_model_cont(tr_container,noise,j,label,t+h / 2,k,cont_count,dmat,mask_y,x_k+k1/2, x_prev=x_prev)[:,k].reshape(-1,1) # k because we want to return the k th column preddicted by the model
                 k3= h*self.my_model_cont(tr_container,noise,j,label,t+h / 2,k,cont_count,dmat,mask_y,x_k+k2/2, x_prev=x_prev)[:,k].reshape(-1,1) # k because we want to return the k th column preddicted by the model
@@ -676,64 +667,4 @@ class feature_forest_flow():
         solution = np.concatenate((solution, np.expand_dims(label_y, axis=1)), axis=1) 
       return solution
    
-
-# print(f"Column {col}: {len(unique_values)} unique categories, correctly in the range [0, ..., {N}]")  
-# Seperate dataset into multiple minibatches for memory-efficient training 
-# Check the category type 
-def check_categorical_columns(X, categorical_columns):
-      for col in categorical_columns:
-          unique_values = np.unique(X[:, col])  # Find unique values in the column
-          N = unique_values.max()  # Maximum category value
-          expected_values = np.arange(0, N + 1)  # Expected range [0, ..., N]
-          assert np.array_equal(unique_values, expected_values), \
-              f"Column {col} has missing categories or values outside the range [0, ..., {N}]. Use label encoding if necessary."
-
-class IterForDMatrix(xgb.core.DataIter):
-    """A data iterator for XGBoost DMatrix.
-    `reset` and `next` are required for any data iterator, the other functions here
-    are utilites for demonstration's purpose.
-    mask_cat and and get_xt_y are respectively functions to concatenate the input of the velocity vector and get a conditional flow at time t
-    """
-    def __init__(self, data,mask_cat,n_t,get_xt_y,make_mat,t,i, dim,model_type="HS3F",   n_batch=1000, n_epochs=10, eps=1e-3):
-        self._data = data
-        self.n_batch = n_batch
-        self.n_epochs = n_epochs
-        self.t = t
-        self.make_mat=make_mat
-        self.eps = eps
-        self.dim = dim
-        self.it = 0  # set iterator to 0
-        self.n_t=n_t
-        self.i=i
-        self.model_type=model_type
-        self.mask_cat=mask_cat
-        self.get_xt_y=get_xt_y
-        super().__init__()
-
-    def reset(self):
-      """Reset the iterator"""
-      self.it = 0
-
-    def next(self, input_data):
-      """Yield next batch of data."""
-      if self.it == self.n_batch*self.n_epochs: # stops after k epochs
-        return 0
-      x1=self._data[self.it % self.n_batch]
-      if self.dim==0:
-        if not self.mask_cat[self.dim]: 
-          X_t,y= self.get_xt_y(x1,self.dim,self.t,self.i) 
-          y_no_miss = ~np.isnan(y.ravel())
-          input_data(data=X_t[y_no_miss, :], label=y[y_no_miss])
-          self.it += 1  
-        #If this is not respected then we move because the first categorical variable is generated using a multinomial sampling based on the class frequencies of this variable 
-      else:
-        if self.mask_cat[self.dim] and self.model_type== "HS3F": 
-          x_t,y= self.make_mat(x1,self.dim),x1[:,self.dim]   
-        else:
-          X_t,y= self.get_xt_y(x1,self.dim,self.t,self.i) 
-          x_t= self.make_mat(x1,self.dim,X_t) 
-        y_no_miss = ~np.isnan(y.ravel())
-        input_data(data=x_t[y_no_miss, :], label=y[y_no_miss])
-        self.it += 1
-      return 1
-     
+#Jesus
