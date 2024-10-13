@@ -40,7 +40,7 @@ To clone this repository to your local machine, use the following command:
     * pip install -r requirements.txt # Install all the needed libraries
 3. Running all the model for all the data after cloning
     * To run this script, in your terminal run this:  `python -m unittest Test_Model_.Test_class.test` (make sure you change the argument `parent` in the Test_Model.py before running)
-4. Reproduce the iris plot 
+4. Reproduce the iris and 2 Moons plots 
     * Use the notebook `Iris_Plot.ipynb`
 5.  Navigating into the Seq3F folder where you can access useful functions
     * cd Seq3F 
@@ -148,6 +148,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE. 
-<\pre>
+<pre>
 
 <!-- #endregion -->
