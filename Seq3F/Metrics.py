@@ -135,7 +135,7 @@ def Metrics(ngen,nexp,model,data_name,n_t,K_dpl,which_solver,model_type,
                             n_t=n_t,
                             model='xgboost', # in random_forest, xgboost, lgbm
                             duplicate_K=K_dpl,
-                            bin_indexes=bin_y,
+                            bin_indexes=[],
                             cat_indexes=cat_indexes,
                             int_indexes=int_indexes,
                             n_jobs=n_jobs,
@@ -146,7 +146,7 @@ def Metrics(ngen,nexp,model,data_name,n_t,K_dpl,which_solver,model_type,
                         n_t=n_t,
                         model='xgboost', # in random_forest, xgboost, lgbm
                         duplicate_K=K_dpl,
-                        bin_indexes=bin_y, # vector which indicates which column is binary
+                        bin_indexes=[], # vector which indicates which column is binary
                         cat_indexes=cat_indexes, #Vector indicating which column is categorical
                         int_indexes=int_indexes, # vector which indicates which column is an integer (ordinal variables such as number of cats in a box)
                         n_jobs=n_jobs,
