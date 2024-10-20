@@ -77,16 +77,10 @@ def Metrics(ngen,nexp,model,data_name,n_t,K_dpl,which_solver,model_type,
             f1[test_type][test_type2] = 0.0
     # If Mask_cat is not provided then define it based on the categorical index provided
     if mask_cat== None:
-        if cat_indexes is not None:
-            if  cat_y or bin_y:        
-                mask_cat= [i in cat_indexes or i in bin_y  for i in range(X.shape[1]-1)]+[True]  #Correct
-            else:
-                mask_cat= [i in cat_indexes or i in bin_y  for i in range(X.shape[1]-1)]+[False]  #Correct
-        else:
-            if  cat_y or bin_y:      
-                mask_cat=[False]*(X.shape[1]-1) +[True]
-            else:
-                mask_cat=[False]*(X.shape[1])
+        if cat_indexes is not None: 
+                mask_cat= [i in cat_indexes  for i in range(X.shape[1]-1)]+[cat_y]  #Correct
+        else: 
+                mask_cat=[False]*(X.shape[1]-1) +[cat_y]
 
     # Loop over the number of experiments you wish to run (nexp=1 by defaults)
     for n in range(nexp):
