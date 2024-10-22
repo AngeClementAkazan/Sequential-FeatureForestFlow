@@ -54,10 +54,10 @@ To clone this repository to your local machine, use the following command:
 <pre>
 ├── Plots_material/
 │   ├── CS3F_Euler_Results.csv     #CSV files for the CS3F-based Euler results 
-│   ├── CS3F_Euler_Results.csv     #CSV files for the CS3F-based Euler results
+│   ├── CS3F_Rg4_Results.csv       #CSV files for the CS3F-based Rg4 results
 │   ├── FFM.csv                    #CSV files for the ForestFlow results
-│   ├── CS3F_Euler_Results.csv     #CSV files for the CS3F-based Euler results
-│   ├── CS3F_Euler_Results.csv     #CSV files for the CS3F-based Euler results
+│   ├── HS3F_Euler_Results.csv     #CSV files for the HS3F-based Euler results
+│   ├── HS3F_Rg4_Results.csv       #CSV files for the HS3F-based Rg4 results
 │   ├── Plotting_Values.ipynb      #Contains code for plotting  the results for all metrics for each of the methods used in this study
 ├── Seq3F/
 │   ├── __init__.py                #Initialization file  
