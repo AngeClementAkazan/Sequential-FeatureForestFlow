@@ -7,7 +7,7 @@ from Seq3F.S3F import feature_forest_flow
 from ForestFlow import ForestDiffusionModel #Forest Flow
 
 # np.random.seed(999)
-# To run this script, in your terminal run this:  python -m unittest Test_Model_.Test_class.test_method_1
+# To run this script, in your terminal run this:  python -m unittest Test_Model.Test_class.test
 
 #Create a function that will create a csv table for  the error metrics 
 def create_csv(data_set_name,dic):
