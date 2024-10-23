@@ -40,7 +40,7 @@ To clone this repository to your local machine, use the following command:
     * myenv\Scripts\activate     # Use this to activate your virtual environment if you work  Windows
     * pip install -r requirements.txt # Install all the needed libraries
 3. Running all the model for all the data after cloning
-    * To run this script, in your terminal run this:  `python -m unittest Test_Model_.Test_class.test` (make sure you change the argument `parent` in the Test_Model.py before running)
+    * To run this script, in your terminal run this:  `python -m unittest Test_Model.Test_class.test` (make sure you change the argument `parent` in the Test_Model.py before running)
 4. Reproduce the iris and 2 Moons plots 
     * Use the notebook `Iris_Plot.ipynb`
 5.  Navigating into the Seq3F folder where you can access useful functions
