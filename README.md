@@ -32,7 +32,8 @@ ForestFlow matching is a powerful method for tabular data generation.  This meth
 ### Work With Repository
 1. Cloning
 To clone this repository to your local machine, use the following command:
-    * git clone https://github.com/AngeClementAkazan/Sequential-FeatureForestFlow.git 
+    * git clone https://github.com/AngeClementAkazan/Sequential-FeatureForestFlow.git
+    * navigate into the code folder using "cd Sequential-FeatureForestFlow"
 2. Create a virtual environment (You should create an virtual environment to avoid any dependency issues [More information about virtual environments](https://docs.python.org/3/library/venv.html))
     * python -m venv name_of_your_environment # Create your virtual environment
     * source myenv/bin/activate  # Use this to activate your virtual environment if you work on macOS/Linux
