@@ -28,7 +28,7 @@ ForestFlow matching is a powerful method for tabular data generation.  This meth
 * max_depth= 7 #max depth of the tree; recommended to leave at default.
 * n_estimators= 100 #number of trees per XGBoost model; recommended to leave at default.
 * arg1 and arg2 are respectively, the remaining hyperparameter for tunning the regressor and the classifier ( We did not consider all the argument for our Xgboost regressor and classifier, ythe user will define them personnally if needed).
-<pre> 
+ </pre> 
 
 ### Work With Repository
 1. Cloning
