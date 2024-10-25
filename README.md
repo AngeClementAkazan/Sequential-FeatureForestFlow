@@ -31,7 +31,7 @@ ForestFlow matching is a powerful method for tabular data generation.  This meth
 * arg1 and arg2 are respectively, the remaining hyperparameter for tunning the regressor and the classifier ( We did not consider all the argument for our Xgboost regressor and classifier, ythe user will define them personnally if needed).
  </pre> 
 
-### Work With Repository
+### Useful Tips to work with this repository
 1. Cloning
 To clone this repository to your local machine, use the following command:
     * git clone https://github.com/AngeClementAkazan/Sequential-FeatureForestFlow.git
