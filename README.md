@@ -126,7 +126,7 @@ We also welcome contributions in the form of pull requests. If you'd like to con
 5. Push your changes to your forked repository.
 6. Open a pull request on the GitHub repository, stating the purpose of your changes and any relevant details.
 
-We will review your pull request ASAP and provide feedback or merge it if it meets our guidelines.
+We will review your pull request ASAP and provide feedback or merge it (if it meets our standards).
 ## Citing the paper
  <pre>  
 @misc{akazan2024generatingtabulardatausing,
