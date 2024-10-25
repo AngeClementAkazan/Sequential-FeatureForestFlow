@@ -110,11 +110,9 @@ with Minibatch Optimal Transport by Alexander Tong et. al [Github](https://githu
 
 We welcome contributions from the community to help improve this project. If you encounter any issues or have suggestions for new features, please feel free to open an issue on GitHub.
 
-### Reporting Issues
-If you find a bug or have a problem with the project, please open an issue on the GitHub repository. Be sure to include detailed steps to reproduce the issue, including any error messages or screenshots if applicable.
-
-### Feature Requests
-If you have an idea for a new feature or improvement, we'd love to hear about it! Please open an issue on the GitHub repository and describe your suggestion in detail.
+### Reporting Issues and Feature Requests
+* If you find a bug or have a problem with the project, please open an issue on the GitHub repository. Include detailed steps to reproduce the issue, including any error messages or screenshots.
+* If you have an idea for a new feature or improvement, we'd love to hear about it! Please open an issue on the GitHub repository and describe your suggestion.
 
 ### Pull Requests
 We also welcome contributions in the form of pull requests. If you'd like to contribute code changes, fixes, or new features, please follow these steps:
