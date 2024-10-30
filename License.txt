@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2023 Samsung Electronics Co., Ltd. All Rights Reserved.
+Copyright (c) 2023 Ange-Clément Akazan.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
