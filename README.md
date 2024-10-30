@@ -67,15 +67,15 @@ To clone this repository to your local machine, use the following command:
 │   ├── S3F.py                     #Contains the main Sequential-FeatureForestFlow class 
 │   ├── __init__.py                #Initialization file  
 │   ├── data_loader.py             #Contains functions for loading data
-│   ├── utlis.py                   #Contains functions that feeds Metrics.pyand S3F.py 
+│   ├── utlis.py                   #Contains functions that feed Metrics.and S3F.py 
 │       
 ├── .gitignore                      #List of files ignored by git (pycache and DS_Store)
 ├── ForestFlow.py                   #Contains the original ForestFlow Class from [https://github.com/SamsungSAILMontreal/ForestDiffusion]
 ├── License.txt                     #The license terms
 ├── Iris_Plot.ipynb                 #Contain code to reproduce the iris file
 ├── README.md                       #This file
-├── requirements.txt                #Contain requires lybraries
-├── setup.py                        #File for installing project as a package
+├── requirements.txt                #Contain requires libraries
+├── setup.py                        #File for installing the project as a package
 └── Test_Model.py                   #Test script for the package.
 
 </pre>
@@ -108,10 +108,10 @@ Gradient-Boosted Trees by Alexia Joliecoeur et. al [Github](https://github.com/S
 with Minibatch Optimal Transport by Alexander Tong et. al [Github](https://github.com/atong01/conditional-flow-matching)
  ## Contributing
 
-We welcome contributions from the community to help improve this project. If you encounter any issues or have suggestions for new features, please feel free to open an issue on GitHub.
+We welcome contributions from the community to help improve this project. If you encounter any issues or have suggestions for new features, please open an issue on GitHub.
 
 ### Reporting Issues and Feature Requests
-* If you find a bug or have a problem with the project, please open an issue on the GitHub repository. Include detailed steps to reproduce the issue, including any error messages or screenshots.
+* If you find a bug or have a problem with the project, please open an issue on the GitHub repository. Include detailed steps to reproduce the issue, including error messages or screenshots.
 * If you have an idea for a new feature or improvement, we'd love to hear about it! Please open an issue on the GitHub repository and describe your suggestion.
 
 ### Pull Requests
