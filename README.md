@@ -63,23 +63,23 @@ To clone this repository to your local machine, use the following command:
 │   ├── HS3F_Rg4_Results.csv       #CSV files for the HS3F-based Rg4 results
 │   ├── Plotting_Values.ipynb      #Contains code for plotting  the results for all metrics for each of the methods used in this study
 ├── Seq3F/
+│   ├── Metrics.py                 #Contains functions for calculating metrics
+│   ├── S3F.py                     #Contains the main Sequential-FeatureForestFlow class 
 │   ├── __init__.py                #Initialization file  
 │   ├── data_loader.py             #Contains functions for loading data
-│   ├── Metrics.py                 #Contains functions for calculating metrics
-│   ├── Flow_matching_class.py     #Contains classes and functions for flow matching
-│   ├── S3F.py                     #Contains the main Sequential-FeatureForestFlow class 
 │   ├── utlis.py                   #Contains functions that feeds Metrics.pyand S3F.py 
 │       
 ├── .gitignore                      #List of files ignored by git (pycache and DS_Store)
-├── ForestFlow.py                   #Contains the original ForestFlow Class
-├── License.txt                     # The license terms
+├── ForestFlow.py                   #Contains the original ForestFlow Class from [https://github.com/SamsungSAILMontreal/ForestDiffusion]
+├── License.txt                     #The license terms
 ├── Iris_Plot.ipynb                 #Contain code to reprodu ce the iris file
 ├── README.md                       #This file
-├──Requirements.txt                 #Contain requires lybraries
+├── requirements.txt                #Contain requires lybraries
 ├── setup.py                        #File for installing project as a package
 └── Test_Model.py                   #Test script for the package.
 
 </pre>
+<!-- │   ├── Flow_matching_class.py     #Contains classes and functions for flow matching -->
 <!-- <pre>
 │
 ├── My_pachage/
