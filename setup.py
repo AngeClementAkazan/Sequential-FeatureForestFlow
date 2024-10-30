@@ -4,7 +4,7 @@ with open("README", 'r') as f:
     long_description = f.read()
 
 setup( 
-    name='Forest FLow-Based Per Variable Sampling',
+    name='HS3F',
    version='1.1.0',
    description='This package implements a modified version of flow matching that is based on a per-variable sampling (generation) instead of generating the full data',
    license="MIT",
