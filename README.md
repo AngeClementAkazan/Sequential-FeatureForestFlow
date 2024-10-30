@@ -72,7 +72,7 @@ To clone this repository to your local machine, use the following command:
 ├── .gitignore                      #List of files ignored by git (pycache and DS_Store)
 ├── ForestFlow.py                   #Contains the original ForestFlow Class from [https://github.com/SamsungSAILMontreal/ForestDiffusion]
 ├── License.txt                     #The license terms
-├── Iris_Plot.ipynb                 #Contain code to reprodu ce the iris file
+├── Iris_Plot.ipynb                 #Contain code to reproduce the iris file
 ├── README.md                       #This file
 ├── requirements.txt                #Contain requires lybraries
 ├── setup.py                        #File for installing project as a package
