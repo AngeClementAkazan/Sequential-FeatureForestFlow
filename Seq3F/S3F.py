@@ -16,7 +16,7 @@ from scipy.special import softmax
 import random
 
 
-#################################### Class for the Sequential FeatureForestFlow framework ########################################
+#################################### Class for the Sequential FeatureForestFlow (S3F) framework ########################################
 # The data should be a numpy array 
 # Categorical features should be numerical (rather than strings), make sure to use x = pd.factorize(x)[0] to make them as such
 # Make sure to specific which features are categorical and which are integers
@@ -31,7 +31,7 @@ class feature_forest_flow():
                n_t=50, # number of noise level
                model='xgboost', # Xgboost model for conditional velocity learning (could be any other ML model)
                solver_type='Rg4', # Solver type: argument (Euler or Rg4)
-               model_type='HS3F', #HS3F for heterogenuous  and  CS3F for regressor only,
+               model_type='HS3F', #HS3F for heterogeneous S3F  and  CS3F for continuous S3F,
                one_hot_encoding=False, #Boolean variable indicating whether or not we encode our categorical data
                duplicate_K=100, # number of different noise sample per real data sample
                cat_indexes=[], #Vector indicating which column is categorical/binary (the classes must be under the form [0,1,...,J]) if not, use label encoding before using your data
